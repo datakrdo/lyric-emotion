@@ -7,6 +7,9 @@ from day one without pretending unfinished phases work.
 
 import typer
 
+from lyric_emotion.config import load_config
+from lyric_emotion.data import save_training_data, write_data_report
+
 app = typer.Typer(no_args_is_help=True)
 
 
@@ -19,7 +22,12 @@ def fetch() -> None:
 @app.command(name="build-training")
 def build_training() -> None:
     """Build redistributable training parquet files from GoEmotions/EmoBank (Phase 1)."""
-    raise NotImplementedError("Phase 1: training data build not implemented yet")
+    config = load_config()
+    emotions_path, vad_path = save_training_data(config)
+    report_path = write_data_report(emotions_path, vad_path)
+    typer.echo(f"Wrote {emotions_path}")
+    typer.echo(f"Wrote {vad_path}")
+    typer.echo(f"Wrote {report_path}")
 
 
 @app.command()

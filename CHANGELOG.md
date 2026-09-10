@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased — Phase 1: redistributable training data
+
+- `src/lyric_emotion/data.py`: `build_emotions_dataset()` (GoEmotions via
+  `datasets`, official train/validation/test split, 28 binary label columns)
+  and `build_vad_dataset()` (EmoBank CSV from GitHub, official split,
+  valence/arousal/dominance rescaled from 1-5 to [-1, 1]).
+- `lyric-emotion build-training` writes `data/processed/emotions_train.parquet`,
+  `data/processed/vad_train.parquet`, and `docs/data.md` (split sizes +
+  per-emotion positive counts + VAD means).
+- Confirmed on real data: GoEmotions train split is 43,410 rows; `grief` (77)
+  and `relief` (153) are as scarce as the plan warned — per-class threshold
+  tuning in Phase 2 is not optional. EmoBank: 8,062/1,000/1,000
+  train/dev/test rows, valence/arousal/dominance means near 0 as expected
+  after centering to [-1, 1].
+- Tests (`tests/test_data.py`, marked `network`): label vector is binary,
+  splits don't overlap, VAD stays in range — run against the real
+  downloads, not mocks.
+
 ## Unreleased — Phase 0: project scaffolding
 
 - Initialized `uv` project (Python 3.12, `<3.14` — torch/transformers not yet
