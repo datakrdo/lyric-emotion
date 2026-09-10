@@ -1,0 +1,5 @@
+artists:
+  - name: "The Cure"
+    max_songs: 150
+  - name: "The Smiths"
+    max_songs: 100

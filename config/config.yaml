@@ -1,0 +1,55 @@
+project:
+  name: "lyric-emotion"
+  random_seed: 42
+  language: "en"
+
+paths:
+  raw_dir: "data/raw"
+  interim_dir: "data/interim"
+  processed_dir: "data/processed"
+  cache_dir: "data/cache"
+  output_dir: "output"
+
+acquisition:
+  source: "genius"
+  request_sleep_seconds: 1.0
+  max_retries: 3
+  retry_backoff_seconds: 2.0
+  timeout_seconds: 30
+  save_raw_responses: true
+
+training:
+  base_model: "answerdotai/ModernBERT-base"
+  max_length: 1024
+  batch_size: 16
+  gradient_accumulation_steps: 2
+  learning_rate: 2.0e-5
+  epochs: 4
+  precision: "bf16"
+  use_gpu_if_available: true
+
+emotion_head:
+  dataset: "google-research-datasets/go_emotions"
+  num_labels: 28
+  loss: "bce"
+
+vad_head:
+  dataset: "JULIELab/EmoBank"
+  dims: ["valence", "arousal", "dominance"]
+  loss: "mse"
+
+aggregation:
+  min_songs_per_album: 3
+  min_songs_per_year: 3
+
+statistics:
+  confidence_level: 0.95
+  bootstrap_iterations: 5000
+  alpha: 0.05
+  multiple_testing_correction: "fdr_bh"
+
+visualization:
+  dpi: 300
+  compare_periods:
+    - [1980, 1990]
+    - [1990, 2000]
