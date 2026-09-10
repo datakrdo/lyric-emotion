@@ -9,8 +9,13 @@ from typing import TYPE_CHECKING
 
 import typer
 
-from lyric_emotion.config import load_config
-from lyric_emotion.data import save_training_data, write_data_report
+from lyric_emotion.config import load_artists, load_config
+from lyric_emotion.data import (
+    fetch_all_artists,
+    save_training_data,
+    write_data_report,
+    write_fetch_coverage_report,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -41,7 +46,14 @@ def _write_train_report(result: "TrainResult", docs_dir: "Path | None" = None) -
 @app.command()
 def fetch() -> None:
     """Fetch lyrics for configured artists from Genius (Phase 3)."""
-    raise NotImplementedError("Phase 3: lyrics acquisition not implemented yet")
+    from dotenv import load_dotenv
+
+    load_dotenv()
+    config = load_config()
+    artists = load_artists().artists
+    raw_artists = fetch_all_artists(config, artists)
+    report_path = write_fetch_coverage_report(raw_artists)
+    typer.echo(f"Wrote {report_path}")
 
 
 @app.command(name="build-training")
@@ -79,6 +91,41 @@ def train(
 
     typer.echo(f"Saved model to {result.model_dir}")
     _write_train_report(result)
+
+
+def _read_train_metrics(report_path: "Path") -> dict:
+    import json
+
+    block = report_path.read_text().split("```json\n")[1].split("\n```")[0]
+    return json.loads(block)  # type: ignore[no-any-return]
+
+
+@app.command(name="evaluate-baselines")
+def evaluate_baselines() -> None:
+    """Compare our fine-tuned heads against cirimus/modernbert-base-go-emotions
+    and the NRC-VAD lexicon (Phase 2 acceptance criteria)."""
+    from pathlib import Path
+
+    from lyric_emotion.evaluate import (
+        evaluate_emotions_baseline,
+        evaluate_vad_baseline,
+        write_baseline_report,
+    )
+
+    config = load_config()
+    docs_dir = Path("docs")
+    our_emotions = _read_train_metrics(docs_dir / "training_emotions.md")
+    our_vad = _read_train_metrics(docs_dir / "training_vad.md")
+
+    typer.echo("Scoring cirimus/modernbert-base-go-emotions on the validation split...")
+    baseline_emotions = evaluate_emotions_baseline(config)
+    typer.echo("Scoring the NRC-VAD lexicon on the EmoBank dev split...")
+    baseline_vad = evaluate_vad_baseline(config)
+
+    report_path = write_baseline_report(
+        our_emotions, baseline_emotions, our_vad, baseline_vad, docs_dir
+    )
+    typer.echo(f"Wrote {report_path}")
 
 
 @app.command()

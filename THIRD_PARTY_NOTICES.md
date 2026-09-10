@@ -27,19 +27,28 @@ used. Checked before any code in Phase 1+ touches these resources.
 
 ### MoodyLyrics
 - **Source:** Çano & Morisio, "MoodyLyrics: A Sentiment Annotated Lyrics
-  Dataset" (2017)
-- **License:** distributes song IDs + mood-quadrant labels only, no lyrics
-  text. Verify exact terms before Phase 3/4 use.
-- **Use:** Stage 2 weak labels; lyrics fetched independently via Genius, not
-  redistributed.
-- **Reviewed:** pending (Phase 3)
+  Dataset" (2017), hosted at softeng.polito.it/erion/research.html.
+  MoodyLyrics4Q (2000 songs, 4 Russell quadrants) and MoodyLyricsPN
+  (5000 songs, pos/neg) both derived from Last.fm tags.
+- **License:** no formal open-source license. Terms are "free to use, cite
+  the paper" (academic courtesy license, not a grant to redistribute).
+  Distributes song IDs/artist/title + mood labels only, no lyrics text.
+- **Use:** Stage 2 weak labels. Lyrics fetched independently via Genius, not
+  redistributed. The MoodyLyrics CSV itself is **not committed** to this
+  repo — downloaded on demand into the gitignored cache dir, same policy as
+  NRC-VAD. Cite Çano & Morisio (ACM ISMSI 2017 / AIAP 2017) in the README.
+- **Reviewed:** 2026-09-10
 
 ### Deezer Mood Detection Dataset (DMDD)
 - **Source:** `deezer/deezer_mood_detection_dataset` on GitHub
-- **License:** verify before Phase 3/4 use (distributes Deezer/MSD IDs +
-  valence/arousal values, no audio or lyrics).
-- **Use:** Stage 2 weak labels.
-- **Reviewed:** pending (Phase 3)
+- **License:** none declared (`license: null` via GitHub API — no LICENSE
+  file). Distributes Deezer track IDs + Million Song Dataset IDs +
+  valence/arousal values only, no audio or lyrics ("for copyright reasons"
+  per the repo's own README).
+- **Use:** Stage 2 weak labels. Treated the same as MoodyLyrics: **not
+  committed** to this repo, fetched into the gitignored cache dir, cited to
+  Delbouys, Hennequin & Piccoli (the accompanying paper) in the README.
+- **Reviewed:** 2026-09-10
 
 ### NRC-VAD Lexicon v2
 - **Source:** saifmohammad.com (NRC, National Research Council Canada)

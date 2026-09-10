@@ -45,6 +45,6 @@ Positive-label count per emotion (train split):
 
 | split | rows | valence mean | arousal mean | dominance mean |
 |---|---|---|---|---|
-| dev | 1000 | -0.019 | 0.016 | 0.031 |
+| dev | 999 | -0.019 | 0.016 | 0.031 |
 | test | 1000 | -0.011 | 0.017 | 0.032 |
 | train | 8062 | -0.011 | 0.022 | 0.031 |

@@ -1,5 +1,62 @@
 # Changelog
 
+## Unreleased — Phase 3 (in progress): Genius acquisition client
+
+- `src/lyric_emotion/data.py`: `fetch_artist_songs()` fetches one artist's
+  full catalog via `lyricsgenius.Genius.search_artist()` (built-in
+  pagination, retry, and rate-limit handling via `timeout`/`sleep_time`/
+  `retries`, configured from `config.yaml`'s `acquisition` section — no
+  hand-rolled backoff needed). Caches the raw response per artist under
+  `data/raw/genius/<slug>.json`; re-running `fetch` skips any artist whose
+  cache file already exists, so a crash mid-run doesn't force a full
+  re-download.
+- `write_fetch_coverage_report()`: per-artist table (requested / fetched /
+  with lyrics / with album / with year / excluded / duplicate titles),
+  written to `docs/fetch_coverage.md` — reviewed before any later phase
+  touches this data, per the project's acquisition-review rule.
+- `lyric-emotion fetch` wired to both.
+- Verified live against the real Genius API (The Smiths, 3 songs): cache
+  hit correctly skips the network entirely on a second run.
+- `THIRD_PARTY_NOTICES.md`: closed the two pending Phase 3 license entries
+  — MoodyLyrics and the Deezer Mood Detection Dataset (DMDD) both have no
+  formal open license, just "free for research, cite the paper" terms.
+  Same policy as NRC-VAD: never committed to the repo, downloaded into the
+  gitignored cache dir.
+- `annotation/GUIDELINES.md`: the gold-set annotation guide — label from
+  text only, 28 GoEmotions labels (multi-label) + VAD on a 1-5 scale,
+  ~25 songs/day, re-annotate 30 a week later for intra-annotator
+  Cohen's kappa / ICC (no second annotator in v1 — documented as a
+  limitation, not hidden).
+- `tests/test_fetch.py`: pure-logic tests for title normalization,
+  slugification, cache reuse, and coverage counting — no network needed.
+- Not yet done: the actual full fetch run for The Cure/The Smiths, the
+  cleaning/dedup step (rapidfuzz, live/remix/demo/reissue flags), and the
+  gold-set sampling + annotation itself.
+
+## Unreleased — Phase 2 (in progress): baselines + full-run fixes
+
+- `src/lyric_emotion/evaluate.py`: `evaluate_emotions_baseline()` scores
+  `cirimus/modernbert-base-go-emotions` on our GoEmotions validation split
+  (confirmed its label order matches `GOEMOTIONS_LABELS` exactly, so no
+  remapping needed) with the same threshold-tuned macro-F1 as our model.
+  `evaluate_vad_baseline()` downloads the NRC-VAD lexicon v2.1 (55k terms,
+  non-commercial research use, never committed — cached under
+  `data/cache/`) and scores a mean-of-known-words baseline against the
+  EmoBank dev split with the same CCC/Pearson metrics. Both run on CPU —
+  one-off eval, not worth competing with the training run for GPU memory.
+  `lyric-emotion evaluate-baselines` wires both into `docs/baseline_comparison.md`.
+- Two real bugs found running the **full** (non-smoke) training data,
+  invisible during the 500-row smoke test:
+  - `batch_size=16` at `max_length=1024` OOM'd on the RTX 4070's 8GB. Fixed
+    by dropping to `batch_size=4` / `gradient_accumulation_steps=8` (same
+    effective batch size, 32) and enabling `gradient_checkpointing=True`.
+  - One EmoBank row had `text=NaN`, present in the `dev` split but absent
+    from the 500-row train-split subsample used by the smoke test — crashed
+    the tokenizer. Fixed with `dropna(subset=["text"])` in
+    `build_vad_dataset()`; `vad_train.parquet` and `docs/data.md`
+    regenerated (10,061 rows instead of 10,062).
+- `tests/test_evaluate.py`: pure-logic test for the lexicon word-averaging.
+
 ## Unreleased — Phase 2 (in progress): fine-tuning code + smoke test
 
 - `src/lyric_emotion/model.py`: `train_emotions()` (ModernBERT-base,

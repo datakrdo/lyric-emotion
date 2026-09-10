@@ -86,6 +86,7 @@ def _run_trainer(
         gradient_accumulation_steps=config.training.gradient_accumulation_steps,
         num_train_epochs=epochs if epochs is not None else config.training.epochs,
         bf16=config.training.precision == "bf16" and torch.cuda.is_available(),
+        gradient_checkpointing=True,
         logging_steps=50,
         seed=config.project.random_seed,
         save_total_limit=1,
