@@ -1,0 +1,264 @@
+{
+  "bands": [
+    "The Cure",
+    "The Smiths"
+  ],
+  "emotions": {
+    "families": [
+      {
+        "ci_high": 0.6689076388434496,
+        "ci_low": 0.25100274699251685,
+        "delta": 0.45545002261420175,
+        "family": "Joy & fun",
+        "p_adj_album": 0.013993003498250875,
+        "p_album": 0.001999000499750125,
+        "p_cure_higher": 0.7277250113071009,
+        "status": "clear"
+      },
+      {
+        "ci_high": -0.13943051084701988,
+        "ci_low": -0.5678633720930232,
+        "delta": -0.3487109905020353,
+        "family": "Questioning",
+        "p_adj_album": 0.03498250874562719,
+        "p_album": 0.009995002498750625,
+        "p_cure_higher": 0.3256445047489823,
+        "status": "suggestive"
+      },
+      {
+        "ci_high": 0.01559147645098412,
+        "ci_low": -0.2534624815711272,
+        "delta": -0.11216644052464947,
+        "family": "Anger & contempt",
+        "p_adj_album": 0.2544977511244378,
+        "p_album": 0.11344327836081959,
+        "p_cure_higher": 0.4439167797376753,
+        "status": "none"
+      },
+      {
+        "ci_high": 0.40198687349717094,
+        "ci_low": -0.040624547161918,
+        "delta": 0.20669380370872908,
+        "family": "Love & warmth",
+        "p_adj_album": 0.2544977511244378,
+        "p_album": 0.1454272863568216,
+        "p_cure_higher": 0.6033469018543646,
+        "status": "none"
+      },
+      {
+        "ci_high": 0.07533023665994153,
+        "ci_low": -0.3003716354126802,
+        "delta": -0.10040705563093621,
+        "family": "Sadness & loss",
+        "p_adj_album": 0.43518240879560216,
+        "p_album": 0.31084457771114443,
+        "p_cure_higher": 0.4497964721845319,
+        "status": "none"
+      },
+      {
+        "ci_high": 0.20678335478335466,
+        "ci_low": -0.11028916246775057,
+        "delta": 0.05110809588421533,
+        "family": "Fear & unease",
+        "p_adj_album": 0.6355155755455606,
+        "p_album": 0.544727636181909,
+        "p_cure_higher": 0.5255540479421077,
+        "status": "none"
+      },
+      {
+        "ci_high": 0.14601163905617456,
+        "ci_low": -0.2554556810317178,
+        "delta": -0.04545454545454547,
+        "family": "Hope & relief",
+        "p_adj_album": 0.68015992003998,
+        "p_album": 0.68015992003998,
+        "p_cure_higher": 0.4772727272727273,
+        "status": "none"
+      }
+    ],
+    "status": "clear"
+  },
+  "emotions_compared": [
+    {
+      "emotion": "sadness",
+      "higher": "The Smiths",
+      "median_a": 0.196563720703125,
+      "median_b": 0.21119664510091146,
+      "p_adj": 0.6171651016596964,
+      "p_album": 0.4102948525737131,
+      "pair_share_a": 0.46720940750791495,
+      "significant": false
+    },
+    {
+      "emotion": "confusion",
+      "higher": "The Smiths",
+      "median_a": 0.1794921875,
+      "median_b": 0.3182809012276786,
+      "p_adj": 0.0069965017491254375,
+      "p_album": 0.0004997501249375312,
+      "pair_share_a": 0.23496155585707823,
+      "significant": true
+    },
+    {
+      "emotion": "curiosity",
+      "higher": "The Smiths",
+      "median_a": 0.0689697265625,
+      "median_b": 0.25195457821800593,
+      "p_adj": 0.0069965017491254375,
+      "p_album": 0.0004997501249375312,
+      "pair_share_a": 0.2566711895070104,
+      "significant": true
+    },
+    {
+      "emotion": "disapproval",
+      "higher": "The Smiths",
+      "median_a": 0.118438720703125,
+      "median_b": 0.24578475952148438,
+      "p_adj": 0.013993003498250875,
+      "p_album": 0.0014992503748125937,
+      "pair_share_a": 0.24853007688828588,
+      "significant": true
+    },
+    {
+      "emotion": "joy",
+      "higher": "The Cure",
+      "median_a": 0.1951141357421875,
+      "median_b": 0.08918033946644177,
+      "p_adj": 0.020989505247376312,
+      "p_album": 0.0029985007496251873,
+      "pair_share_a": 0.7234283129805518,
+      "significant": true
+    }
+  ],
+  "families": [
+    {
+      "ci_high": 0.6689076388434496,
+      "ci_low": 0.25100274699251685,
+      "delta": 0.45545002261420175,
+      "family": "Joy & fun",
+      "p_adj_album": 0.013993003498250875,
+      "p_album": 0.001999000499750125,
+      "p_cure_higher": 0.7277250113071009,
+      "status": "clear"
+    },
+    {
+      "ci_high": -0.13943051084701988,
+      "ci_low": -0.5678633720930232,
+      "delta": -0.3487109905020353,
+      "family": "Questioning",
+      "p_adj_album": 0.03498250874562719,
+      "p_album": 0.009995002498750625,
+      "p_cure_higher": 0.3256445047489823,
+      "status": "suggestive"
+    },
+    {
+      "ci_high": 0.01559147645098412,
+      "ci_low": -0.2534624815711272,
+      "delta": -0.11216644052464947,
+      "family": "Anger & contempt",
+      "p_adj_album": 0.2544977511244378,
+      "p_album": 0.11344327836081959,
+      "p_cure_higher": 0.4439167797376753,
+      "status": "none"
+    },
+    {
+      "ci_high": 0.40198687349717094,
+      "ci_low": -0.040624547161918,
+      "delta": 0.20669380370872908,
+      "family": "Love & warmth",
+      "p_adj_album": 0.2544977511244378,
+      "p_album": 0.1454272863568216,
+      "p_cure_higher": 0.6033469018543646,
+      "status": "none"
+    },
+    {
+      "ci_high": 0.07533023665994153,
+      "ci_low": -0.3003716354126802,
+      "delta": -0.10040705563093621,
+      "family": "Sadness & loss",
+      "p_adj_album": 0.43518240879560216,
+      "p_album": 0.31084457771114443,
+      "p_cure_higher": 0.4497964721845319,
+      "status": "none"
+    },
+    {
+      "ci_high": 0.20678335478335466,
+      "ci_low": -0.11028916246775057,
+      "delta": 0.05110809588421533,
+      "family": "Fear & unease",
+      "p_adj_album": 0.6355155755455606,
+      "p_album": 0.544727636181909,
+      "p_cure_higher": 0.5255540479421077,
+      "status": "none"
+    },
+    {
+      "ci_high": 0.14601163905617456,
+      "ci_low": -0.2554556810317178,
+      "delta": -0.04545454545454547,
+      "family": "Hope & relief",
+      "p_adj_album": 0.68015992003998,
+      "p_album": 0.68015992003998,
+      "p_cure_higher": 0.4772727272727273,
+      "status": "none"
+    }
+  ],
+  "meta": {
+    "config_sha256": "af318e73651f6841",
+    "seed": 42,
+    "versions": {
+      "numpy": "2.5.3",
+      "pandas": "3.0.5",
+      "scikit-learn": "1.9.0",
+      "scipy": "1.18.1"
+    }
+  },
+  "poles": {
+    "The Cure": [
+      "joy",
+      "excitement",
+      "nervousness"
+    ],
+    "The Smiths": [
+      "confusion",
+      "disapproval",
+      "curiosity"
+    ]
+  },
+  "question_line_share": {
+    "The Cure": 0.022099447513812154,
+    "The Smiths": 0.05008278145695364
+  },
+  "sensitivity": {
+    "excluding_stage2_training_songs": {
+      "n": 133,
+      "style_auc": 0.8364540931705111,
+      "valence_delta": -0.06060606060606055
+    }
+  },
+  "style": {
+    "auc": 0.8364540931705111,
+    "auc_without_question_labels": 0.8266847580280416,
+    "n_permutations": 200,
+    "null_95": 0.6199316939890708,
+    "p_value": 0.004975124378109453,
+    "status": "clear"
+  },
+  "valence": {
+    "ci_high": 0.12843616794543897,
+    "ci_low": -0.3000310178619859,
+    "delta": -0.06060606060606055,
+    "p_album": 0.6401799100449775,
+    "smallest_effect_of_interest": 0.147,
+    "status": "none_detected"
+  },
+  "verdict": "Equally sad, in different ways: The Cure show more joy; The Smiths show more confusion, curiosity and disapproval.",
+  "window": {
+    "end_year": 1987,
+    "n_a": 67,
+    "n_albums": 18,
+    "n_b": 66,
+    "n_songs": 133,
+    "n_studio_albums": 8,
+    "start_year": 1982
+  }
+}

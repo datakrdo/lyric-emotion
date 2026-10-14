@@ -1,0 +1,81 @@
+song_id,artist,title,year,tercile,valence,arousal,families,low_confidence,notes,annotation_date,is_reannotation
+the-cure__all-i-want,The Cure,All I Want,1987.0,2,2.0,4.0,Sadness & loss;Fear & unease,0.0,,2026-10-12,0
+the-cure__the-baby-screams,The Cure,The Baby Screams,1985.0,0,2.0,2.0,Questioning;Sadness & loss,0.0,,2026-10-12,0
+the-cure__bird-mad-girl,The Cure,Bird Mad Girl,1984.0,1,3.0,2.0,Hope & relief;Love & warmth,0.0,,2026-10-12,0
+the-cure__the-caterpillar,The Cure,The Caterpillar,1984.0,2,4.0,4.0,Joy & fun;Love & warmth,0.0,,2026-10-12,0
+the-cure__snakepit,The Cure,Snakepit,1987.0,1,4.0,4.0,Love & warmth;Hope & relief,0.0,,2026-10-12,0
+the-cure__six-different-ways,The Cure,Six Different Ways,1985.0,2,3.0,2.0,Neutral / unclear;Questioning,0.0,,2026-10-12,0
+the-cure__one-hundred-years,The Cure,One Hundred Years,1982.0,0,2.0,2.0,Sadness & loss;Fear & unease,0.0,,2026-10-12,0
+the-smiths__asleep,The Smiths,Asleep,1985.0,2,1.0,2.0,Sadness & loss;Fear & unease,0.0,,2026-10-12,0
+the-cure__the-exploding-boy,The Cure,The Exploding Boy,1985.0,0,4.0,3.0,Hope & relief;Love & warmth,0.0,,2026-10-12,0
+the-cure__a-thousand-hours,The Cure,A Thousand Hours,1987.0,0,1.0,2.0,Sadness & loss;Questioning,0.0,,2026-10-12,0
+the-smiths__girlfriend-in-a-coma,The Smiths,Girlfriend in a Coma,1987.0,0,,,,,,,0
+the-cure__the-walk,The Cure,The Walk,1983.0,2,,,,,,,0
+the-smiths__ask,The Smiths,Ask,1986.0,2,,,,,,,0
+the-cure__breathe,The Cure,Breathe,1987.0,2,,,,,,,0
+the-smiths__rubber-ring,The Smiths,Rubber Ring,1985.0,2,,,,,,,0
+the-smiths__heaven-knows-i-m-miserable-now,The Smiths,Heaven Knows I’m Miserable Now,1984.0,0,,,,,,,0
+the-smiths__unloveable,The Smiths,Unloveable,1986.0,2,,,,,,,0
+the-smiths__pretty-girls-make-graves,The Smiths,Pretty Girls Make Graves,1984.0,1,,,,,,,0
+the-smiths__shakespeare-s-sister,The Smiths,Shakespeare’s Sister,1985.0,1,,,,,,,0
+the-smiths__accept-yourself,The Smiths,Accept Yourself,1983.0,0,,,,,,,0
+the-cure__a-short-term-effect,The Cure,A Short Term Effect,1982.0,0,,,,,,,0
+the-smiths__the-queen-is-dead,The Smiths,The Queen is Dead,1986.0,1,,,,,,,0
+the-cure__shiver-and-shake,The Cure,Shiver and Shake,1987.0,0,,,,,,,0
+the-smiths__paint-a-vulgar-picture,The Smiths,Paint a Vulgar Picture,1987.0,0,,,,,,,0
+the-cure__push,The Cure,Push,1985.0,2,,,,,,,0
+the-smiths__half-a-person,The Smiths,Half a Person,1987.0,1,,,,,,,0
+the-smiths__last-night-i-dreamt-that-somebody-loved-me,The Smiths,Last Night I Dreamt That Somebody Loved Me,1987.0,0,,,,,,,0
+the-smiths__a-rush-and-a-push-and-the-land-is-ours,The Smiths,A Rush and a Push and the Land Is Ours,1987.0,1,,,,,,,0
+the-cure__just-like-heaven,The Cure,Just Like Heaven,1987.0,1,,,,,,,0
+the-cure__the-top,The Cure,The Top,1984.0,2,,,,,,,0
+the-smiths__i-won-t-share-you,The Smiths,I Won’t Share You,1987.0,1,,,,,,,0
+the-smiths__the-headmaster-ritual,The Smiths,The Headmaster Ritual,1985.0,2,,,,,,,0
+the-cure__siamese-twins,The Cure,Siamese Twins,1982.0,0,,,,,,,0
+the-smiths__this-night-has-opened-my-eyes,The Smiths,This Night Has Opened My Eyes,1984.0,0,,,,,,,0
+the-smiths__these-things-take-time,The Smiths,These Things Take Time,1984.0,0,,,,,,,0
+the-cure__how-beautiful-you-are,The Cure,How Beautiful You Are,1987.0,1,,,,,,,0
+the-smiths__william-it-was-really-nothing,The Smiths,"William, It Was Really Nothing",1984.0,1,,,,,,,0
+the-cure__piggy-in-the-mirror,The Cure,Piggy in the Mirror,1984.0,1,,,,,,,0
+the-smiths__the-hand-that-rocks-the-cradle,The Smiths,The Hand That Rocks the Cradle,1984.0,0,,,,,,,0
+the-cure__close-to-me,The Cure,Close to Me,1985.0,0,,,,,,,0
+the-smiths__death-of-a-disco-dancer,The Smiths,Death of a Disco Dancer,1987.0,2,,,,,,,0
+the-cure__in-between-days,The Cure,In Between Days,1985.0,0,,,,,,,0
+the-cure__a-strange-day,The Cure,A Strange Day,1982.0,1,,,,,,,0
+the-cure__screw,The Cure,Screw,1985.0,2,,,,,,,0
+the-cure__cold,The Cure,Cold,1982.0,0,,,,,,,0
+the-smiths__rusholme-ruffians,The Smiths,Rusholme Ruffians,1985.0,1,,,,,,,0
+the-cure__a-man-inside-my-mouth,The Cure,A Man Inside My Mouth,1985.0,0,,,,,,,0
+the-cure__catch,The Cure,Catch,1987.0,2,,,,,,,0
+the-smiths__hand-in-glove,The Smiths,Hand in Glove,1983.0,2,,,,,,,0
+the-smiths__suffer-little-children,The Smiths,Suffer Little Children,1984.0,1,,,,,,,0
+the-smiths__what-difference-does-it-make,The Smiths,What Difference Does It Make?,1984.0,0,,,,,,,0
+the-smiths__reel-around-the-fountain,The Smiths,Reel Around the Fountain,1984.0,2,,,,,,,0
+the-cure__pornography,The Cure,Pornography,1982.0,1,,,,,,,0
+the-cure__a-few-hours-after-this,The Cure,A Few Hours After This,1985.0,2,,,,,,,0
+the-smiths__still-ill,The Smiths,Still Ill,1984.0,0,,,,,,,0
+the-cure__sugar-girl,The Cure,Sugar Girl,1987.0,1,,,,,,,0
+the-smiths__girl-afraid,The Smiths,Girl Afraid,1984.0,0,,,,,,,0
+the-cure__stop-dead,The Cure,Stop Dead,1985.0,1,,,,,,,0
+the-smiths__back-to-the-old-house,The Smiths,Back to the Old House,1984.0,0,,,,,,,0
+the-smiths__the-boy-with-the-thorn-in-his-side,The Smiths,The Boy with the Thorn in His Side,1985.0,2,,,,,,,0
+the-smiths__cemetry-gates,The Smiths,Cemetry Gates,1986.0,1,,,,,,,0
+the-cure__the-kiss,The Cure,The Kiss,1987.0,0,,,,,,,0
+the-cure__dressing-up,The Cure,Dressing Up,1984.0,2,,,,,,,0
+the-smiths__bigmouth-strikes-again,The Smiths,Bigmouth Strikes Again,1986.0,2,,,,,,,0
+the-smiths__i-keep-mine-hidden,The Smiths,I Keep Mine Hidden,1987.0,1,,,,,,,0
+the-smiths__i-don-t-owe-you-anything,The Smiths,I Don’t Owe You Anything,1984.0,1,,,,,,,0
+the-smiths__miserable-lie,The Smiths,Miserable Lie,1984.0,2,,,,,,,0
+the-cure__the-perfect-girl,The Cure,The Perfect Girl,1987.0,2,,,,,,,0
+the-cure__let-s-go-to-bed,The Cure,Let’s Go to Bed,1982.0,2,,,,,,,0
+the-cure__just-one-kiss,The Cure,Just One Kiss,1982.0,0,,,,,,,0
+the-smiths__unhappy-birthday,The Smiths,Unhappy Birthday,1987.0,0,,,,,,,0
+the-cure__new-day,The Cure,New Day,1985.0,1,,,,,,,0
+the-cure__a-chain-of-flowers,The Cure,A Chain of Flowers,1987.0,0,,,,,,,0
+the-cure__hot-hot-hot,The Cure,Hot Hot Hot!!!,1987.0,1,,,,,,,0
+the-smiths__please-please-please-let-me-get-what-i-want,The Smiths,"Please, Please, Please Let Me Get What I Want",1984.0,2,,,,,,,0
+the-cure__the-empty-world,The Cure,The Empty World,1984.0,1,,,,,,,0
+the-smiths__you-just-haven-t-earned-it-yet-baby,The Smiths,"You Just Haven’t Earned It Yet, Baby",1987.0,1,,,,,,,0
+the-smiths__some-girls-are-bigger-than-others,The Smiths,Some Girls Are Bigger Than Others,1986.0,2,,,,,,,0
+the-cure__a-japanese-dream,The Cure,A Japanese Dream,1987.0,1,,,,,,,0
+the-smiths__shoplifters-of-the-world-unite,The Smiths,Shoplifters of the World Unite,1987.0,0,,,,,,,0

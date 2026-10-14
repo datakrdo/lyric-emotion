@@ -1,0 +1,11 @@
+# Light theme only: the orange band color (#eb6834) fails the dark-surface
+# lightness check, so there is no dark variant.
+[theme]
+base = "light"
+primaryColor = "#2a78d6"
+backgroundColor = "#fcfcfb"
+secondaryBackgroundColor = "#f3f2ee"
+textColor = "#0b0b0b"
+font = "sans-serif"
+headingFont = "serif"
+chartCategoricalColors = ["#2a78d6", "#eb6834"]

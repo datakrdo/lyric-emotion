@@ -1,5 +1,33 @@
 artists:
   - name: "The Cure"
-    max_songs: 150
+    max_songs: 1000
+    active_from: 1976
+    non_studio_albums:
+      - "Paris" # live album (1993), no "live"/"session" keyword in the name
+      - "Show" # live album (1993), no "live"/"session" keyword in the name
+    studio_albums:
+      - "Three Imaginary Boys"
+      - "Seventeen Seconds"
+      - "Faith"
+      - "Pornography"
+      - "The Top"
+      - "The Head on the Door"
+      - "Kiss Me, Kiss Me, Kiss Me"
+      - "Disintegration"
+      - "Wish"
+      - "Wild Mood Swings"
+      - "Bloodflowers"
+      - "The Cure"
+      - "4:13 Dream"
+      - "Songs of a Lost World"
   - name: "The Smiths"
-    max_songs: 100
+    max_songs: 250
+    active_from: 1982
+    active_to: 1987
+    non_studio_albums:
+      - "Rank" # live album (1988), no "live" keyword in the name
+    studio_albums:
+      - "The Smiths"
+      - "Meat Is Murder"
+      - "The Queen Is Dead"
+      - "Strangeways, Here We Come"

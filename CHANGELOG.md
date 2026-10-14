@@ -1,5 +1,329 @@
 # Changelog
 
+## Unreleased — audit corrections and dashboard redesign
+
+- `vad_domain` retrained on a clean domain set (case-study artists, split leaks
+  and repeated texts removed; DMDD scores rescaled by a fixed 1/2 instead of
+  clipped to +-1). Three seeds each for DMDD + MoodyLyrics and DMDD only:
+  `docs/vad_domain_ablation.md`. Valence is now the mean of the three
+  DMDD + MoodyLyrics seeds.
+- Comparison window is derived from the artists' active years (1982-1987)
+  instead of 1980-1989, so the later and earlier Cure albums no longer
+  outweigh The Smiths' short run.
+- Corpus fixes after reviewing the dashboard: Genius pages with no album
+  (misattributed or fan pages, 24 of them) are left out, and when several
+  versions of a song survive dedup the plain title with an album wins over
+  "(New York Vocal)"-style variants and orphan pages, then the longest lyric.
+  This restored "This Charming Man" (it was represented by a 12" mix) and
+  "There Is a Light That Never Goes Out". Corpus: 289 songs.
+- An emotion family is "clear" only if its FDR-adjusted album-level p is below
+  0.05 and its bootstrap interval excludes the smallest effect of interest
+  (0.147), the same bar used for valence. "Questioning" is therefore
+  suggestive.
+- Resampling and permutation units are studio albums; a song on a studio album
+  counts once there, and songs found only on singles/compilations form
+  "Singles & rarities <year>" groups per band.
+
+Corrections to earlier entries below (those record what was true when written):
+- Comparison results changed after section-based re-scoring and the corpus
+  cleanup. The Phase 5 entry's "amusement/excitement/pride higher in The Cure"
+  no longer holds; the per-artist trend statement ("no significant trend,
+  p > 0.2") predates `vad_domain`, and arousal/dominance trends are now
+  treated as unvalidated (arousal r=0.135 against DMDD) and left out of the
+  narrative.
+- Songs on one album are not independent (36 albums, not 168 songs), so the
+  headline inference is now album-level: whole-album bootstrap and
+  permutation, grouped cross-validation. Song-level Mann-Whitney stays in
+  `artist_comparison.csv` as descriptive.
+
+Changes:
+- Corpus provenance: `flag_song_versions` also flags `is_other_artist`,
+  `is_cover` (band covering someone else) and `is_non_english`; one
+  `is_studio_take()` replaces four copies of the predicate; the dedup no
+  longer prefers a longer cover by another artist over the band's own take.
+  Release year falls back to Genius' display strings. Window: 168 songs
+  (102 / 66), was 154.
+- `artists.yaml: studio_albums` — explicit studio-album lists; editions fold
+  into their base album, everything else is `kind="other"`.
+- Whole-lyric VAD scoring (`models.case_study_vad_unit: full`) for
+  `vad_domain`, which was trained on whole lyrics; sections remain for the
+  emotions head. `evaluate-baselines` now scores both checkpoints in both
+  units on a test split without text shared with train/validation.
+- Bootstraps take `random_seed`; band order comes from `artists.yaml`.
+- `lyric-emotion export-app` writes `app/data/` (songs, albums, findings; no
+  lyrics). The dashboard is rewritten around it: three pages, a two-axis map
+  (brightness x overall feel), a trust panel, and no statistics computed in
+  the app. `app/requirements.txt` and a light theme make it deployable.
+- `data/processed/domain_train.parquet` (full Genius lyrics) is git-ignored.
+
+## Unreleased — performance + evaluation-honesty audit
+
+- Fixed a silent evaluation bug: `train_sampling_strategy="group_by_length"`
+  also reorders `Trainer.predict()`'s eval/test batches (not just training
+  batches), which had been misaligning predictions against externally-built
+  label arrays and tanking reported metrics (emotions macro F1 looked like
+  0.07 instead of the real ~0.51). Fixed with a `_SequentialEvalTrainer`
+  mixin that pins eval/predict back to dataset order.
+- Metrics now honestly reported on held-out test splits, not validation:
+  emotions macro F1 0.5127 / micro F1 0.5930 / mAP 0.5069 on GoEmotions
+  test (5,427 rows); VAD stage 1 CCC 0.71/0.47/0.32 on EmoBank test (1,000
+  rows); stage 1 vs. stage 2 VAD compared on the same DMDD test split.
+- Songs are now scored section-by-section (`split_sections`, dedupes
+  repeated choruses) instead of as one giant padded blob — cuts truncation
+  and lets the emotions head (trained on ~20-token comments) see
+  comment-length inputs instead of 300+ token lyric sheets.
+- `case_study_vad` switched from `vad` to `vad_domain`: on the same DMDD
+  test split with section-based scoring, the domain-adapted checkpoint
+  beats stage 1 on both valence and arousal
+  (`docs/vad_checkpoint_comparison.md`), so `analyze` now scores the case
+  study with it.
+- Training speed: dynamic padding (`padding=False` + `DataCollatorWithPadding`)
+  plus `group_by_length`, gradient checkpointing now config-driven and off
+  by default for the short-text heads (emotions/VAD stage 1), and a
+  separate `short_text_max_length` (128) for those heads instead of the
+  1024 used for lyric-length sequences — avoids grouping a rare
+  1000+-token GoEmotions outlier into a batch sized for whole lyric sheets.
+- `predict_texts` now loads `models/vad_domain` per `case_study_vad`
+  instead of a hardcoded `models/vad` — stage 2 had never actually reached
+  the case study before this fix.
+- Added `evaluate-gold`: scores the hand-annotated gold set (macro/micro F1,
+  VAD CCC/Pearson, Cohen's kappa, ICC(2,1)) once annotation is done; raises
+  a clear error until then (158 candidates, 0 labeled so far).
+
+## Unreleased — Phase 4: domain-adaptation fetch, stage-2 VAD, consistency check
+
+- `build-domain-training` fetch completed: 4,896 lyrics cached from Genius
+  for MoodyLyrics + the DMDD sample, yielding 4,913 rows in
+  `domain_train.parquet` (2,969 DMDD, 1,944 MoodyLyrics).
+- Added `train_vad_domain()` / `lyric-emotion train --head vad-domain`:
+  continues the stage-1 VAD checkpoint on the weak-labeled domain data,
+  MSE loss masked to valence/arousal only — the weak labels carry no
+  dominance signal, so that output row never gets a gradient and its
+  stage-1 weights are left alone. Saved to `models/vad_domain`; validation
+  CCC 0.33/0.21 for valence/arousal (lower than stage-1's EmoBank numbers,
+  expected given label noise — the gold set is the real arbiter).
+- Added `emotion_vad_consistency()` (Fase 4's label-free check): projects
+  each song's 28 emotion probabilities to VAD via NRC-VAD-lexicon
+  centroids and correlates against the regression head's own VAD output
+  on the same 325 scored songs — no gold-set labels needed. Pearson r
+  0.67/0.42/0.24 for valence/arousal/dominance. Wired into
+  `evaluate-baselines`, writes `docs/consistency_check.md`.
+
+## Unreleased — fix: per-album year and dashboard default range
+
+- Bug found (via the dashboard) and fixed: per-album `year` in `by_album.csv`
+  was the *mean* of each song's own release date, but songs on one album
+  often carry different per-song dates in Genius metadata (a bonus track,
+  an earlier single) — the mean produced fractional, meaningless years
+  (e.g. 1982.5). Switched to the mode (most common year in the group,
+  NaN-safe), which matches the album's real release year.
+- Dashboard's year-range slider now defaults to `config.comparison`'s
+  1980-1989 window (the project's headline case-study period) instead of
+  the full discography, while still allowing the full range via the
+  slider — the full-career trend is intentional per the plan, not a bug,
+  but defaulting the view to the comparison window avoids the confusion.
+
+## Unreleased — Phase 6: dashboard skeleton
+
+- Added `app/streamlit_app.py`: reads the tables `analyze`/`report` already
+  wrote (`song_emotions.parquet`, `by_album.csv`, `by_year.csv`,
+  `artist_comparison.csv`) — no recomputation, no lyrics text ever
+  displayed. Artist/year-range filters, an interactive VA-plane scatter,
+  valence-over-time line with CI, an emotion radar per artist, an
+  album-level table with `n` + CI and CSV export, and the FDR-corrected
+  comparison table.
+- Verified it boots and serves (headless run, HTTP 200, no errors in log)
+  before calling it done.
+
+## Unreleased — Phase 5: artist comparison + figures (`report`)
+
+- Wired up `lyric-emotion report` (was a stub): compares The Cure vs The
+  Smiths over the 1980-1989 overlap window (`studio_corpus_comparison.parquet`)
+  across all 31 score columns (28 emotion probabilities + VAD), writing
+  `output/tables/artist_comparison.csv`, and generates the plan's four
+  required Phase 5 figures into `output/figures/`.
+- Added `analysis.cliffs_delta()` (non-parametric effect size, doesn't assume
+  normality) and `analysis.compare_artists()` (mean diff + bootstrap CI +
+  Cliff's delta + Mann-Whitney p-value, FDR-corrected via `statsmodels` since
+  31 comparisons run at once — per the plan's explicit requirement).
+- Added `src/lyric_emotion/figures.py` (separate from the pure-stats
+  `analysis.py`): VA-plane trajectory (signature figure, chronological
+  arrows per album), album x emotion heatmap, valence-by-year line with
+  bootstrap CI band and `n` labeled at each point, emotion distribution by
+  artist. Palette: categorical blue/orange for artist identity,
+  single-hue blue sequential for the heatmap's magnitude grid.
+- `analyze` now also merges each album's mean release year into
+  `by_album.csv` (needed by the VA trajectory figure to order/label albums
+  chronologically).
+- Real result on the 1980-1989 window: after FDR correction, The Cure score
+  significantly higher on amusement, excitement, joy, and pride, and
+  significantly lower on confusion, curiosity, and disapproval (p_adj <
+  0.01 throughout); valence/arousal/dominance differences are not
+  significant. Reported as-is — no effect size overstated.
+
+## Unreleased — Phase 5: corpus scoring + aggregation (`analyze`)
+
+- Wired up `lyric-emotion analyze` (was a stub): scores the full studio
+  corpus with `predict_texts()`, writes `data/processed/song_emotions.parquet`,
+  then uses the existing (already-tested) `analysis.py` aggregation
+  functions to write `output/tables/by_album.csv`, `by_year.csv`, and
+  `temporal_trends.csv` (per-artist linear trend for valence/arousal/
+  dominance).
+- Album-level scores join the per-song table against `song_albums.parquet`
+  so a song counts toward every album it was released on (reissues,
+  compilations), not just its first appearance — year-level aggregation
+  and temporal trends use the song's original release year only, to avoid
+  double-counting a song's mood into multiple years.
+- `predict_texts()`: moved both models to GPU when available and batched
+  inference (32 at a time) — was running the whole corpus as one CPU batch,
+  slow at any real corpus size (domain-adaptation set will be thousands of
+  rows).
+- Bug found and fixed: 36/325 songs have no `release_date` (NaN `year`),
+  which made `stats.linregress` return NaN for every artist's whole trend,
+  not just those rows. Fixed at the source — `temporal_regression()` now
+  drops rows with a missing year/score before regressing. Added a
+  regression test.
+- Real run over the full studio corpus (325 songs): no statistically
+  significant temporal trend in valence/arousal/dominance for either
+  artist (p > 0.2, R² < 0.02 throughout) — reported as-is, no
+  overinterpreted trend line.
+
+## Unreleased — Phase 4/5: inference (`predict`)
+
+- Implemented `predict_texts()` in `model.py`: loads both trained heads
+  (`models/emotions`, `models/vad`), scores a batch of texts, applies the
+  per-class thresholds tuned during training (`docs/training_emotions.md`)
+  to decide which emotions are "active", and returns raw valence/arousal/
+  dominance alongside them.
+- Wired up `lyric-emotion predict --text "..."` (was a stub). Manual sanity
+  check: a happy/grateful line comes back `admiration`/`joy` + valence
+  0.67; a lonely/heartbroken line comes back `sadness`/`disappointment` +
+  valence -0.59 — signs point the right way.
+- Deduplicated `_read_train_metrics` (was cli-only) into a shared
+  `read_train_metrics()` in `model.py`, used by both `predict` and
+  `evaluate-baselines`.
+
+## Unreleased — Phase 4: domain-adaptation dataset skeleton
+
+- Added `build-domain-training` CLI command: fetches MoodyLyrics4Q (full,
+  ~2000 songs, 4-quadrant mood mapped to weak valence/arousal anchors) and a
+  configurable sample of DMDD (native valence/arousal, already
+  ~standardized so clipped to [-1, 1]) via `download_moodylyrics()`/
+  `download_dmdd()`, then `fetch_domain_lyrics()` looks up each song's
+  lyrics on Genius (one cached JSON per song, resumable), joins them in,
+  and writes `data/processed/domain_train.parquet` +
+  `docs/domain_data.md`.
+- `config/config.yaml`: new `domain_adaptation.dmdd_sample_size` (default
+  3000) — DMDD is 18.6k tracks and the plan calls for a sample, not all of
+  it, to keep the Genius lookup volume manageable.
+- `tests/test_domain_data.py`: offline unit tests for the mood→VAD mapping
+  and lyrics-fetch caching (mocked `lyricsgenius.Genius`, no network).
+- Not yet done: the actual full fetch (thousands of Genius lookups, will
+  take a while — not run yet) and the stage-2 continued fine-tune itself.
+
+## Unreleased — Phase 2: baseline comparison (acceptance criteria)
+
+- `evaluate-baselines` run: scores `cirimus/modernbert-base-go-emotions`
+  on our GoEmotions validation split, and the NRC-VAD lexicon on the
+  EmoBank dev split, both against our trained heads. Wrote
+  `docs/baseline_comparison.md`.
+- Emotions: `cirimus` edges us out, 0.578 vs 0.557 macro F1 — expected,
+  same base model and dataset; reported honestly rather than hidden.
+- VAD: we clearly beat the NRC-VAD lexicon baseline on all three
+  dimensions (CCC 0.71/0.50/0.28 vs 0.29/0.18/0.10 for
+  valence/arousal/dominance) — the trained regression head earns its
+  keep over a non-neural baseline.
+- Bug fixed: `_download_nrc_vad_lexicon()` got HTTP 406 from
+  saifmohammad.com with the default `requests` user agent; added an
+  explicit `User-Agent` header.
+
+## Unreleased — Phase 2: emotions head retrain (class-imbalance fix)
+
+- Retrained the emotions head with inverse-frequency `pos_weight` (capped
+  at 20x) for the BCE loss and per-class threshold tuning on validation,
+  replacing the flat 0.5 cutoff — needed because GoEmotions' rarest
+  classes (`grief`, `relief`) have under 200 positives out of 43,410 train
+  rows.
+- Full run (2 epochs, 43,410 train / 5,426 val rows): macro F1 **0.557**.
+  Best classes: `gratitude` (0.92), `amusement` (0.79), `love` (0.79).
+  Worst: `relief` (0.28), `realization` (0.31), `excitement` (0.36) — the
+  scarcest and most semantically overlapping labels, as expected.
+- First run of this retrain hung on the GPU ~71% through training (driver/
+  CUDA stall, 0% GPU utilization for hours with no crash or error) after
+  running unattended overnight. Added `--resume` to `lyric-emotion train`
+  (passes `resume_from_checkpoint` through to the HF `Trainer`, which
+  picks up the latest checkpoint under `models/<head>/`); killed the
+  hung process and resumed cleanly from the last saved checkpoint
+  (epoch-1 boundary) instead of restarting from scratch.
+- `docs/training_emotions.md` regenerated with the real metrics.
+
+## Unreleased — Phase 4 (in progress): domain-adaptation data acquisition
+
+- `src/lyric_emotion/data.py`: `download_moodylyrics()` (MoodyLyrics4Q,
+  2000 songs across Russell's 4 mood quadrants, mirrored from a third-party
+  GitHub repo since the original host has no stable direct-download URL)
+  and `download_dmdd()` (Deezer Mood Detection Dataset, 18,644 tracks with
+  continuous valence/arousal, official train/validation/test split from
+  the source GitHub repo). Both cache raw CSVs locally (gitignored, never
+  committed) and normalize columns to a common `artist`/`title` schema.
+  Verified against the real downloads: 2000 rows (500/quadrant) and 18,644
+  rows respectively.
+- `tests/test_fetch.py`: cache-reuse + column-normalization tests for both,
+  no live network needed.
+- Not yet done: fetching lyrics for these songs via Genius (a much larger
+  fetch than the case-study artists — subsample size still to be decided)
+  and the Stage 2 domain fine-tune itself.
+
+## Unreleased — Phase 5 (scaffolded ahead of inference): aggregation
+
+- `src/lyric_emotion/analysis.py`: `bootstrap_ci()` (percentile bootstrap),
+  `aggregate_by_album()`/`aggregate_by_year()` (mean + bootstrap CI per
+  group, dropping groups below `config.aggregation.min_songs_per_album`/
+  `min_songs_per_year` rather than silently reporting an unreliable n), and
+  `temporal_regression()` (per-artist slope/R²/p-value/n via
+  `scipy.stats.linregress`, exploratory-only per the project's
+  no-causal-claims rule). Built and tested against synthetic scores ahead
+  of real model inference, so it's ready to plug in once `predict` exists.
+- `tests/test_analysis.py`: 4 tests, no model/network dependency.
+
+## Unreleased — Phase 3: full corpus fetch, dedup, and gold-set sampling
+
+- Full Genius fetch run against real `max_songs` targets (Cure 1000, Smiths
+  250, derived from their true discography sizes of 892/192 plus buffer):
+  came back with 773/149 raw songs respectively — Genius's own catalog
+  ceiling, not a config limit. Cached under `data/raw/genius/`.
+- `flag_song_versions()`/`dedupe_studio_songs()` extended to check **both**
+  the title suffix and the album name against the live/demo/remix/reissue
+  regexes (`_version_flags`) — a whole live album with a non-descriptive
+  name (e.g. The Smiths' "Rank") wouldn't otherwise be caught. Added
+  `Artist.non_studio_albums` in `config/artists.yaml` as an explicit
+  exception list for albums regex genuinely can't catch (`Rank`; also
+  added The Cure's `Paris`/`Show` as a defensive backstop, though both
+  turned out already caught via per-track "(Live in ...)" title suffixes).
+- `build_song_album_map()`: new, deliberately separate from
+  `dedupe_studio_songs()` — keeps a song's studio-only appearance on
+  *every* album it legitimately shipped on (e.g. "Heaven Knows I'm
+  Miserable Now" on both `Hatful of Hollow` and `Louder Than Bombs`),
+  since album-level mood aggregation (Phase 5) needs that, while the
+  model's training text needs exactly one canonical row per song.
+- `config.comparison` (`start_year`/`end_year`, 1980-1989): The Smiths'
+  active period (1982-1987) plus a couple years' buffer either side, to
+  see mood shift before/after they existed without pulling in unrelated
+  Cure eras (e.g. 1994). `filter_by_year_range()` + `save_studio_corpus()`
+  write `studio_corpus_comparison.parquet` alongside the full corpus.
+- Result: 773 raw → 268 studio-only (Cure), 149 raw → 76 studio-only
+  (Smiths); comparison window has 97 Cure + 61 Smiths songs.
+- `sample_gold_set_candidates()`: stratified sampling by artist × decade
+  (largest-remainder method) — applied to the comparison-window corpus
+  (158 songs total, all of which are within the window, since that's the
+  actual analysis focus). Wrote `annotation/gold_set_candidates.csv`.
+- Generated `annotation/gold_set.csv`: empty annotation template, 158 rows
+  × 39 columns (stable `song_id` = `artist-slug__title-slug`, 28
+  GoEmotions columns pre-filled 0, VAD/notes/dates blank) — ready for
+  manual annotation per `annotation/GUIDELINES.md`.
+- `tests/test_fetch.py`: added tests for the album-name/config-exception
+  live-detection path and `build_song_album_map()`'s multi-album behavior.
+
 ## Unreleased — Phase 3 (in progress): Genius acquisition client
 
 - `src/lyric_emotion/data.py`: `fetch_artist_songs()` fetches one artist's
@@ -32,6 +356,38 @@
 - Not yet done: the actual full fetch run for The Cure/The Smiths, the
   cleaning/dedup step (rapidfuzz, live/remix/demo/reissue flags), and the
   gold-set sampling + annotation itself.
+
+## Unreleased — Phase 2 (in progress): full training runs + overfitting/imbalance fixes
+
+- First full (non-smoke) emotions run completed: macro_f1 0.5442, but
+  eval_loss best at epoch 2 (0.0814) and *worse* by epoch 4 (0.0874) even
+  as train loss kept dropping — classic overfitting, only visible by
+  cross-referencing eval_loss rather than trusting the improving training
+  loss. Report saved as `docs/training_emotions_v1_baseline.md` before the
+  retrain overwrites `docs/training_emotions.md`.
+- `_run_trainer()` (`model.py`) fixed in time for the VAD run to benefit:
+  added `weight_decay=0.01`, `load_best_model_at_end=True` +
+  `metric_for_best_model="eval_loss"`, and `EarlyStoppingCallback` — the
+  emotions checkpoint currently on disk predates this fix and needs a
+  retrain to benefit from it.
+- Class-imbalance fix for the emotions head: `_WeightedBCETrainer`
+  (subclasses `Trainer`, overrides `compute_loss` with
+  `BCEWithLogitsLoss(pos_weight=...)`) plus a pos_weight tensor computed
+  in `train_emotions()` from real train-label frequencies (inverse
+  frequency, capped at 20x so grief/relief — under 200 positives out of
+  43k rows — don't destabilize training). `train_vad()` is unaffected
+  (regression task, no pos_weight). Not yet retrained/evaluated.
+- Tried `batch_size 4→16` / `gradient_accumulation_steps 8→2` (same
+  effective batch of 32) expecting a VRAM-utilization speedup. Measured
+  against real logs: the new config ran ~15% *slower* per optimizer step
+  (2.73s/it vs 2.36s/it) — `gradient_checkpointing=True`'s activation
+  recomputation cost apparently scales with micro-batch size, cancelling
+  out the expected parallelism gain. Documented as a non-finding rather
+  than assumed savings; worth re-testing without gradient checkpointing.
+- Not yet done: the emotions retrain itself, and `evaluate-baselines`
+  hasn't been run against either head yet (waiting for VAD to finish and
+  the emotions retrain to land, so the baseline comparison reflects final
+  checkpoints, not the pre-fix ones).
 
 ## Unreleased — Phase 2 (in progress): baselines + full-run fixes
 

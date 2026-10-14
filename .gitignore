@@ -9,6 +9,8 @@ __pycache__/
 data/raw/
 data/interim/
 data/cache/
+# full Genius lyrics (domain-adaptation training text) — never publish
+data/processed/domain_train.parquet
 !data/raw/.gitkeep
 !data/interim/.gitkeep
 !data/cache/.gitkeep

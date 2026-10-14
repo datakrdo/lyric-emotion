@@ -21,12 +21,18 @@ acquisition:
 training:
   base_model: "answerdotai/ModernBERT-base"
   max_length: 1024
-  batch_size: 4
-  gradient_accumulation_steps: 8
+  # emotions/vad (GoEmotions/EmoBank) heads use this instead — see field docstring.
+  short_text_max_length: 128
+  batch_size: 16
+  gradient_accumulation_steps: 2
   learning_rate: 2.0e-5
   epochs: 4
   precision: "bf16"
   use_gpu_if_available: true
+  # Off for the short-text heads (emotions/vad on GoEmotions/EmoBank, ~20-60
+  # tokens) — the memory/speed tradeoff only pays off on the long-sequence
+  # domain-adaptation stage.
+  gradient_checkpointing: false
 
 emotion_head:
   dataset: "google-research-datasets/go_emotions"
@@ -38,18 +44,59 @@ vad_head:
   dims: ["valence", "arousal", "dominance"]
   loss: "mse"
 
+domain_adaptation:
+  # MoodyLyrics is used in full (~2000 songs); DMDD (18.6k) is sampled down
+  # to keep the Genius lookup volume manageable, per the plan's "a sample of
+  # DMDD, not all of it".
+  dmdd_sample_size: 3000
+  # The case-study artists must not appear in the data the scorer is adapted on.
+  exclude_artists: ["The Cure", "Cure", "The Smiths", "Morrissey"]
+
+models:
+  emotions_dir: "models/emotions"
+  vad_dir: "models/vad"
+  vad_domain_dir: "models/vad_domain"
+  # Which VAD checkpoint scores the case-study corpus in `analyze`. Set by
+  # `evaluate-baselines`' vad-checkpoint comparison (docs/vad_checkpoint_comparison.md),
+  # not chosen by hand.
+  case_study_vad: "vad_domain"
+  # vad_domain was trained on whole lyrics (1024 tokens), so it scores whole lyrics.
+  case_study_vad_unit: "full"
+  # One vad_domain run per seed, averaged: a single run moves the Cure-Smiths
+  # valence gap by up to 0.2 (see docs/vad_domain_ablation.md).
+  case_study_vad_ensemble:
+    - "models/vad_domain_both_s42"
+    - "models/vad_domain_both_s1"
+    - "models/vad_domain_both_s2"
+
 aggregation:
   min_songs_per_album: 3
   min_songs_per_year: 3
+
+comparison: {}
+  # Unset: the years in which every artist in artists.yaml was active
+  # (The Smiths, 1982-1987, bound it). Set both to override.
 
 statistics:
   confidence_level: 0.95
   bootstrap_iterations: 5000
   alpha: 0.05
   multiple_testing_correction: "fdr_bh"
+  permutations: 2000
+  cv_permutations: 200
+  cv_repeats: 5
 
 visualization:
   dpi: 300
   compare_periods:
     - [1980, 1990]
     - [1990, 2000]
+
+emotion_families:
+  "Joy & fun": [joy, amusement, excitement]
+  "Love & warmth": [love, caring, desire, admiration, gratitude]
+  "Hope & relief": [optimism, relief, pride, approval]
+  "Sadness & loss": [sadness, grief, disappointment, remorse]
+  "Fear & unease": [fear, nervousness, embarrassment]
+  "Anger & contempt": [anger, annoyance, disgust, disapproval]
+  "Questioning": [confusion, curiosity, surprise, realization]
