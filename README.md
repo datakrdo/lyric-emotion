@@ -1,4 +1,6 @@
-# lyric-emotion
+🇬🇧 [English](README.md) · 🇪🇸 [Español](README_es.md)
+
+# lyric-emotion — emotion analysis of song lyrics
 
 **Did The Cure and The Smiths actually sound as different, emotionally, as
 their reputations suggest?** Both are pillars of 1980s UK post-punk/gothic
@@ -23,7 +25,27 @@ Most "sentiment analysis on lyrics" portfolio projects run an off-the-shelf
    emotional palette shift across their careers and albums, with
    uncertainty and sample sizes reported at every step.
 
-## Data
+## Tools 🛠️
+
+- Python, pandas, NumPy
+- PyTorch, Hugging Face Transformers (ModernBERT-base fine-tuning)
+- GoEmotions, EmoBank, MoodyLyrics, Deezer DMDD, NRC-VAD lexicon
+- Genius API (lyrics fetched locally, never redistributed)
+- Streamlit (dashboard and hand-annotation tool)
+- matplotlib
+- uv, ruff, mypy, pytest, GitHub Actions
+
+## Skills 🧠
+
+- Fine-tuning transformers: multi-label classification and multi-output regression
+- Domain adaptation with weak labels
+- Evaluation against public baselines, with honest reporting when the baseline wins
+- Annotation design: guidelines and validation protocol fixed before rating
+- Statistical inference on clustered data (album-level permutation and resampling, FDR correction)
+- Packaging an ML project as an installable package with CLI, tests, and CI
+- Communicating results with an interactive dashboard
+
+## Data 📎
 
 | stage | source | size | redistributable? |
 |---|---|---|---|
@@ -35,7 +57,7 @@ Most "sentiment analysis on lyrics" portfolio projects run an off-the-shelf
 
 Full license terms and how each source is used: `THIRD_PARTY_NOTICES.md`.
 
-## Method
+## Design decisions 🧭
 
 Two independent ModernBERT-base fine-tunes rather than one multi-task
 model — simpler to debug, and multi-task is left as an optional ablation:
@@ -52,22 +74,16 @@ model — simpler to debug, and multi-task is left as an optional ablation:
   are projected to VAD via NRC-VAD-lexicon centroids and correlated
   against the regression head's own output on the same songs — a sanity
   check that doesn't need any gold-set labels.
-- Case-study scoring: the emotions head scores each song by sections, the
+- **Case-study scoring**: the emotions head scores each song by sections, the
   VAD head scores the whole lyric (how it was trained). Covers, live takes and
   other artists' versions are filtered out first.
-- Inference counts **albums, not songs**: songs on one album sound alike, so
+- **Inference counts albums, not songs**: songs on one album sound alike, so
   differences are tested by permuting/resampling whole albums and
   separability is cross-validated on albums the model has not seen.
 
-## Dashboard
+## Results 📊
 
-`app/` is a self-contained Streamlit app that renders a small bundle
-(`app/data/`, written by `lyric-emotion export-app`; scores only, no lyrics).
-Its centerpiece is a two-axis map: one dot per song, brightness on one axis and
-"overall feel" (the best out-of-sample combination of emotion scores for telling
-the bands apart) on the other. Static figures live in `output/figures/`.
-
-## Findings so far (pre-gold-set)
+Pre-gold-set: every number below is provisional.
 
 - **Emotions head vs. baseline** (GoEmotions test split, thresholds tuned
   on validation): `cirimus/modernbert-base-go-emotions` edges this model
@@ -106,34 +122,21 @@ the bands apart) on the other. Static figures live in `output/figures/`.
   (`docs/vad_domain_ablation.md`). Arousal and dominance did not hold up
   (arousal r = 0.135 against DMDD) and are not reported.
 
-## Limitations
+## Dashboard 📈
 
-- **Gold-set annotation is still pending** — every comparison above is
-  either against a public baseline or against the model's own weak
-  training labels, not against hand-verified ground truth. Treat all
-  numbers as provisional.
-- Weak domain labels (MoodyLyrics/DMDD) are derived from Last.fm tags, not
-  direct annotation — they cap what stage 2 can prove.
-- Lyrics-only signal: valence and mood conveyed by melody, tempo, and
-  instrumentation are not modeled.
-- English only; metaphor, irony, and fictional narrators are not
-  specifically handled — a literal reading of dark lyrics may overstate
-  negative affect.
-- Studio-only dedup can't fully resolve every live/reissue edge case; see
-  `docs/dedup_report.md`.
-- No causal claims anywhere: temporal and cross-artist differences are
-  reported as associations with confidence intervals and sample sizes, not
-  as causes.
+`app/` is a self-contained Streamlit app that renders a small bundle
+(`app/data/`, written by `lyric-emotion export-app`; scores only, no lyrics).
+Its centerpiece is a two-axis map: one dot per song, brightness on one axis and
+"overall feel" (the best out-of-sample combination of emotion scores for telling
+the bands apart) on the other. Static figures live in `output/figures/`.
 
-## Setup
+## Quick start 🚀
 
 ```bash
 uv sync
 cp .env.example .env   # fill in GENIUS_ACCESS_TOKEN and HF_TOKEN locally, never commit
 uv run pytest
 ```
-
-## Reproducing
 
 Training data and the emotion/VAD heads (Phases 1-2) require no
 credentials. Fetching lyrics for the case study or the domain-adaptation
@@ -155,11 +158,29 @@ uv run lyric-emotion export-app                               # Phase 6 bundle
 uv run streamlit run app/streamlit_app.py                     # dashboard
 ```
 
-## What's not published here
+## Limitations ⚠️
 
-Full lyrics text, API tokens, and raw API responses are never committed —
-see `.gitignore` and `THIRD_PARTY_NOTICES.md`. Only code, configs, IDs,
-aggregated scores, figures, and the annotation guidelines are public.
+- **Gold-set annotation is still pending** — every comparison above is
+  either against a public baseline or against the model's own weak
+  training labels, not against hand-verified ground truth. Treat all
+  numbers as provisional.
+- Weak domain labels (MoodyLyrics/DMDD) are derived from Last.fm tags, not
+  direct annotation — they cap what stage 2 can prove.
+- Lyrics-only signal: valence and mood conveyed by melody, tempo, and
+  instrumentation are not modeled.
+- English only; metaphor, irony, and fictional narrators are not
+  specifically handled — a literal reading of dark lyrics may overstate
+  negative affect.
+- Studio-only dedup can't fully resolve every live/reissue edge case; see
+  `docs/dedup_report.md`.
+- No causal claims anywhere: temporal and cross-artist differences are
+  reported as associations with confidence intervals and sample sizes, not
+  as causes.
+
+What's not published here: full lyrics text, API tokens, and raw API
+responses are never committed — see `.gitignore` and `THIRD_PARTY_NOTICES.md`.
+Only code, configs, IDs, aggregated scores, figures, and the annotation
+guidelines are public.
 
 ## License
 
