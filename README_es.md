@@ -26,64 +26,6 @@ usan un clasificador de tweets de 3 clases ya entrenado. Este, en cambio:
    y The Smiths a lo largo de sus carreras y álbumes, con incertidumbre y
    tamaños de muestra reportados en cada paso.
 
-## Herramientas 🛠️
-
-- Python, pandas, NumPy
-- PyTorch, Hugging Face Transformers (fine-tuning de ModernBERT-base)
-- GoEmotions, EmoBank, MoodyLyrics, Deezer DMDD, léxico NRC-VAD
-- API de Genius (letras descargadas en local, nunca redistribuidas)
-- Streamlit (dashboard y herramienta de anotación manual)
-- matplotlib
-- uv, ruff, mypy, pytest, GitHub Actions
-
-## Habilidades 🧠
-
-- Fine-tuning de transformers: clasificación multietiqueta y regresión multisalida
-- Adaptación de dominio con etiquetas débiles
-- Evaluación contra baselines públicos, reportando con honestidad cuando gana el baseline
-- Diseño de anotación: guías y protocolo de validación fijados antes de anotar
-- Inferencia estadística sobre datos agrupados (permutación y remuestreo por álbum, corrección FDR)
-- Empaquetar un proyecto de ML como paquete instalable con CLI, tests y CI
-- Comunicar resultados con un dashboard interactivo
-
-## Decisiones de diseño 🧭
-
-Dos fine-tunes independientes de ModernBERT-base en lugar de un modelo
-multitarea — más simple de depurar; multitarea queda como ablación opcional:
-
-- **Cabeza de emociones**: clasificación multietiqueta de 28 clases, BCE
-  ponderada (etiquetas raras como `grief`/`relief` tienen <200 positivos entre
-  43k filas), con umbrales por clase ajustados en validación en vez de un 0,5
-  global.
-- **Cabeza VAD**: regresión de 3 salidas (valencia/activación/dominancia), pérdida MSE.
-- **Etapa 2 (adaptación de dominio)**: continúa el checkpoint VAD con letras de
-  etiquetado débil, solo valencia/activación — las etiquetas débiles (derivadas
-  de tags de Last.fm) no tienen señal de dominancia, así que esa salida queda
-  con los pesos de la etapa 1.
-- **Chequeo de consistencia sin etiquetas**: las 28 probabilidades de emoción
-  de cada canción se proyectan a VAD con centroides del léxico NRC-VAD y se
-  correlacionan con la salida de la cabeza de regresión sobre las mismas
-  canciones — una verificación que no necesita etiquetas del gold set.
-- **Puntaje del caso de estudio**: la cabeza de emociones puntúa cada canción
-  por secciones; la cabeza VAD puntúa la letra completa (como fue entrenada).
-  Antes se filtran covers, tomas en vivo y versiones de otros artistas.
-- **La inferencia cuenta álbumes, no canciones**: las canciones de un álbum
-  suenan parecido, así que las diferencias se testean permutando/remuestreando
-  álbumes enteros y la separabilidad se valida cruzadamente sobre álbumes que
-  el modelo no vio.
-
-## Fuentes de datos 📎
-
-| etapa | fuente | tamaño | ¿redistribuible? |
-|---|---|---|---|
-| Cabeza de emociones (etapa 1) | GoEmotions | 43.410 train / 5.426 val | sí (Apache-2.0) |
-| Cabeza VAD (etapa 1) | EmoBank | 8.062 train / 999 dev | sí (CC BY-SA 4.0) |
-| Adaptación de dominio (etapa 2) | MoodyLyrics + muestra de DMDD, letras vía Genius | 4.913 canciones con etiquetado débil | no — solo IDs/etiquetas, las letras se descargan por separado |
-| Corpus del caso de estudio | Genius, deduplicado a tomas de estudio | The Cure 256 canciones / The Smiths 75 canciones | no — los términos de Genius no permiten redistribuir |
-| Gold set | anotado a mano por mí | 80 canciones muestreadas, anotación pendiente | n/a |
-
-Términos de licencia completos y uso de cada fuente: `THIRD_PARTY_NOTICES.md`.
-
 ## Resultados 📊
 
 Previos al gold set: todos los números de abajo son provisorios.
@@ -136,29 +78,63 @@ en un eje y "sensación general" (la mejor combinación fuera de muestra de los
 puntajes de emoción para distinguir a las bandas) en el otro. Las figuras
 estáticas están en `output/figures/`.
 
-## Limitaciones ⚠️
+## Fuentes de datos 📎
 
-- **La anotación del gold set sigue pendiente** — toda comparación de arriba es
-  contra un baseline público o contra las propias etiquetas débiles de
-  entrenamiento del modelo, no contra verdad verificada a mano. Los números son
-  provisorios.
-- Las etiquetas débiles de dominio (MoodyLyrics/DMDD) se derivan de tags de
-  Last.fm, no de anotación directa — limitan lo que puede demostrar la etapa 2.
-- Solo señal de letra: la valencia y el ánimo que transmiten la melodía, el
-  tempo y la instrumentación no se modelan.
-- Solo inglés; metáfora, ironía y narradores ficticios no se tratan
-  específicamente — una lectura literal de letras oscuras puede sobreestimar el
-  afecto negativo.
-- La deduplicación a tomas de estudio no resuelve todos los casos borde de
-  en vivo/reediciones; ver `docs/dedup_report.md`.
-- Sin afirmaciones causales: las diferencias temporales y entre artistas se
-  reportan como asociaciones con intervalos de confianza y tamaños de muestra,
-  no como causas.
+| etapa | fuente | tamaño | ¿redistribuible? |
+|---|---|---|---|
+| Cabeza de emociones (etapa 1) | GoEmotions | 43.410 train / 5.426 val | sí (Apache-2.0) |
+| Cabeza VAD (etapa 1) | EmoBank | 8.062 train / 999 dev | sí (CC BY-SA 4.0) |
+| Adaptación de dominio (etapa 2) | MoodyLyrics + muestra de DMDD, letras vía Genius | 4.913 canciones con etiquetado débil | no — solo IDs/etiquetas, las letras se descargan por separado |
+| Corpus del caso de estudio | Genius, deduplicado a tomas de estudio | The Cure 256 canciones / The Smiths 75 canciones | no — los términos de Genius no permiten redistribuir |
+| Gold set | anotado a mano por mí | 80 canciones muestreadas, anotación pendiente | n/a |
 
-Lo que no se publica acá: el texto completo de las letras, los tokens de API y
-las respuestas crudas de la API nunca se commitean — ver `.gitignore` y
-`THIRD_PARTY_NOTICES.md`. Solo son públicos el código, las configs, los IDs, los
-puntajes agregados, las figuras y las guías de anotación.
+Términos de licencia completos y uso de cada fuente: `THIRD_PARTY_NOTICES.md`.
+
+## Decisiones de diseño 🧭
+
+Dos fine-tunes independientes de ModernBERT-base en lugar de un modelo
+multitarea — más simple de depurar; multitarea queda como ablación opcional:
+
+- **Cabeza de emociones**: clasificación multietiqueta de 28 clases, BCE
+  ponderada (etiquetas raras como `grief`/`relief` tienen <200 positivos entre
+  43k filas), con umbrales por clase ajustados en validación en vez de un 0,5
+  global.
+- **Cabeza VAD**: regresión de 3 salidas (valencia/activación/dominancia), pérdida MSE.
+- **Etapa 2 (adaptación de dominio)**: continúa el checkpoint VAD con letras de
+  etiquetado débil, solo valencia/activación — las etiquetas débiles (derivadas
+  de tags de Last.fm) no tienen señal de dominancia, así que esa salida queda
+  con los pesos de la etapa 1.
+- **Chequeo de consistencia sin etiquetas**: las 28 probabilidades de emoción
+  de cada canción se proyectan a VAD con centroides del léxico NRC-VAD y se
+  correlacionan con la salida de la cabeza de regresión sobre las mismas
+  canciones — una verificación que no necesita etiquetas del gold set.
+- **Puntaje del caso de estudio**: la cabeza de emociones puntúa cada canción
+  por secciones; la cabeza VAD puntúa la letra completa (como fue entrenada).
+  Antes se filtran covers, tomas en vivo y versiones de otros artistas.
+- **La inferencia cuenta álbumes, no canciones**: las canciones de un álbum
+  suenan parecido, así que las diferencias se testean permutando/remuestreando
+  álbumes enteros y la separabilidad se valida cruzadamente sobre álbumes que
+  el modelo no vio.
+
+## Herramientas 🛠️
+
+- Python, pandas, NumPy
+- PyTorch, Hugging Face Transformers (fine-tuning de ModernBERT-base)
+- GoEmotions, EmoBank, MoodyLyrics, Deezer DMDD, léxico NRC-VAD
+- API de Genius (letras descargadas en local, nunca redistribuidas)
+- Streamlit (dashboard y herramienta de anotación manual)
+- matplotlib
+- uv, ruff, mypy, pytest, GitHub Actions
+
+## Habilidades 🧠
+
+- Fine-tuning de transformers: clasificación multietiqueta y regresión multisalida
+- Adaptación de dominio con etiquetas débiles
+- Evaluación contra baselines públicos, reportando con honestidad cuando gana el baseline
+- Diseño de anotación: guías y protocolo de validación fijados antes de anotar
+- Inferencia estadística sobre datos agrupados (permutación y remuestreo por álbum, corrección FDR)
+- Empaquetar un proyecto de ML como paquete instalable con CLI, tests y CI
+- Comunicar resultados con un dashboard interactivo
 
 ## Inicio rápido 🚀
 
@@ -187,6 +163,30 @@ uv run lyric-emotion evaluate-gold                            # chequeo humano -
 uv run lyric-emotion export-app                               # Fase 6: bundle
 uv run streamlit run app/streamlit_app.py                     # dashboard
 ```
+
+## Limitaciones ⚠️
+
+- **La anotación del gold set sigue pendiente** — toda comparación de arriba es
+  contra un baseline público o contra las propias etiquetas débiles de
+  entrenamiento del modelo, no contra verdad verificada a mano. Los números son
+  provisorios.
+- Las etiquetas débiles de dominio (MoodyLyrics/DMDD) se derivan de tags de
+  Last.fm, no de anotación directa — limitan lo que puede demostrar la etapa 2.
+- Solo señal de letra: la valencia y el ánimo que transmiten la melodía, el
+  tempo y la instrumentación no se modelan.
+- Solo inglés; metáfora, ironía y narradores ficticios no se tratan
+  específicamente — una lectura literal de letras oscuras puede sobreestimar el
+  afecto negativo.
+- La deduplicación a tomas de estudio no resuelve todos los casos borde de
+  en vivo/reediciones; ver `docs/dedup_report.md`.
+- Sin afirmaciones causales: las diferencias temporales y entre artistas se
+  reportan como asociaciones con intervalos de confianza y tamaños de muestra,
+  no como causas.
+
+Lo que no se publica acá: el texto completo de las letras, los tokens de API y
+las respuestas crudas de la API nunca se commitean — ver `.gitignore` y
+`THIRD_PARTY_NOTICES.md`. Solo son públicos el código, las configs, los IDs, los
+puntajes agregados, las figuras y las guías de anotación.
 
 ## Licencia
 

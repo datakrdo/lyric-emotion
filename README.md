@@ -25,62 +25,6 @@ Most "sentiment analysis on lyrics" portfolio projects run an off-the-shelf
    emotional palette shift across their careers and albums, with
    uncertainty and sample sizes reported at every step.
 
-## Tools 🛠️
-
-- Python, pandas, NumPy
-- PyTorch, Hugging Face Transformers (ModernBERT-base fine-tuning)
-- GoEmotions, EmoBank, MoodyLyrics, Deezer DMDD, NRC-VAD lexicon
-- Genius API (lyrics fetched locally, never redistributed)
-- Streamlit (dashboard and hand-annotation tool)
-- matplotlib
-- uv, ruff, mypy, pytest, GitHub Actions
-
-## Skills 🧠
-
-- Fine-tuning transformers: multi-label classification and multi-output regression
-- Domain adaptation with weak labels
-- Evaluation against public baselines, with honest reporting when the baseline wins
-- Annotation design: guidelines and validation protocol fixed before rating
-- Statistical inference on clustered data (album-level permutation and resampling, FDR correction)
-- Packaging an ML project as an installable package with CLI, tests, and CI
-- Communicating results with an interactive dashboard
-
-## Design decisions 🧭
-
-Two independent ModernBERT-base fine-tunes rather than one multi-task
-model — simpler to debug, and multi-task is left as an optional ablation:
-
-- **Emotions head**: 28-label multi-label classification, weighted BCE
-  (rare labels like `grief`/`relief` have <200 positives out of 43k rows),
-  per-class thresholds tuned on validation instead of a global 0.5.
-- **VAD head**: 3-output regression (valence/arousal/dominance), MSE loss.
-- **Stage 2 (domain adaptation)**: continues the VAD checkpoint on weakly
-  labeled lyrics, valence/arousal only — the weak labels (Last.fm-tag
-  derived) carry no dominance signal, so that output is left at its
-  stage-1 weights.
-- **Label-free consistency check**: each song's 28 emotion probabilities
-  are projected to VAD via NRC-VAD-lexicon centroids and correlated
-  against the regression head's own output on the same songs — a sanity
-  check that doesn't need any gold-set labels.
-- **Case-study scoring**: the emotions head scores each song by sections, the
-  VAD head scores the whole lyric (how it was trained). Covers, live takes and
-  other artists' versions are filtered out first.
-- **Inference counts albums, not songs**: songs on one album sound alike, so
-  differences are tested by permuting/resampling whole albums and
-  separability is cross-validated on albums the model has not seen.
-
-## Data sources 📎
-
-| stage | source | size | redistributable? |
-|---|---|---|---|
-| Emotions head (stage 1) | GoEmotions | 43,410 train / 5,426 val | yes (Apache-2.0) |
-| VAD head (stage 1) | EmoBank | 8,062 train / 999 dev | yes (CC BY-SA 4.0) |
-| Domain adaptation (stage 2) | MoodyLyrics + DMDD sample, lyrics via Genius | 4,913 weakly-labeled songs | no — IDs/labels only, lyrics fetched independently |
-| Case study corpus | Genius, deduped to studio takes | The Cure 256 songs / The Smiths 75 songs | no — Genius terms don't allow redistribution |
-| Gold set | hand-annotated by me | 80 songs sampled, annotation pending | n/a |
-
-Full license terms and how each source is used: `THIRD_PARTY_NOTICES.md`.
-
 ## Results 📊
 
 Pre-gold-set: every number below is provisional.
@@ -130,29 +74,61 @@ Its centerpiece is a two-axis map: one dot per song, brightness on one axis and
 "overall feel" (the best out-of-sample combination of emotion scores for telling
 the bands apart) on the other. Static figures live in `output/figures/`.
 
-## Limitations ⚠️
+## Data sources 📎
 
-- **Gold-set annotation is still pending** — every comparison above is
-  either against a public baseline or against the model's own weak
-  training labels, not against hand-verified ground truth. Treat all
-  numbers as provisional.
-- Weak domain labels (MoodyLyrics/DMDD) are derived from Last.fm tags, not
-  direct annotation — they cap what stage 2 can prove.
-- Lyrics-only signal: valence and mood conveyed by melody, tempo, and
-  instrumentation are not modeled.
-- English only; metaphor, irony, and fictional narrators are not
-  specifically handled — a literal reading of dark lyrics may overstate
-  negative affect.
-- Studio-only dedup can't fully resolve every live/reissue edge case; see
-  `docs/dedup_report.md`.
-- No causal claims anywhere: temporal and cross-artist differences are
-  reported as associations with confidence intervals and sample sizes, not
-  as causes.
+| stage | source | size | redistributable? |
+|---|---|---|---|
+| Emotions head (stage 1) | GoEmotions | 43,410 train / 5,426 val | yes (Apache-2.0) |
+| VAD head (stage 1) | EmoBank | 8,062 train / 999 dev | yes (CC BY-SA 4.0) |
+| Domain adaptation (stage 2) | MoodyLyrics + DMDD sample, lyrics via Genius | 4,913 weakly-labeled songs | no — IDs/labels only, lyrics fetched independently |
+| Case study corpus | Genius, deduped to studio takes | The Cure 256 songs / The Smiths 75 songs | no — Genius terms don't allow redistribution |
+| Gold set | hand-annotated by me | 80 songs sampled, annotation pending | n/a |
 
-What's not published here: full lyrics text, API tokens, and raw API
-responses are never committed — see `.gitignore` and `THIRD_PARTY_NOTICES.md`.
-Only code, configs, IDs, aggregated scores, figures, and the annotation
-guidelines are public.
+Full license terms and how each source is used: `THIRD_PARTY_NOTICES.md`.
+
+## Design decisions 🧭
+
+Two independent ModernBERT-base fine-tunes rather than one multi-task
+model — simpler to debug, and multi-task is left as an optional ablation:
+
+- **Emotions head**: 28-label multi-label classification, weighted BCE
+  (rare labels like `grief`/`relief` have <200 positives out of 43k rows),
+  per-class thresholds tuned on validation instead of a global 0.5.
+- **VAD head**: 3-output regression (valence/arousal/dominance), MSE loss.
+- **Stage 2 (domain adaptation)**: continues the VAD checkpoint on weakly
+  labeled lyrics, valence/arousal only — the weak labels (Last.fm-tag
+  derived) carry no dominance signal, so that output is left at its
+  stage-1 weights.
+- **Label-free consistency check**: each song's 28 emotion probabilities
+  are projected to VAD via NRC-VAD-lexicon centroids and correlated
+  against the regression head's own output on the same songs — a sanity
+  check that doesn't need any gold-set labels.
+- **Case-study scoring**: the emotions head scores each song by sections, the
+  VAD head scores the whole lyric (how it was trained). Covers, live takes and
+  other artists' versions are filtered out first.
+- **Inference counts albums, not songs**: songs on one album sound alike, so
+  differences are tested by permuting/resampling whole albums and
+  separability is cross-validated on albums the model has not seen.
+
+## Tools 🛠️
+
+- Python, pandas, NumPy
+- PyTorch, Hugging Face Transformers (ModernBERT-base fine-tuning)
+- GoEmotions, EmoBank, MoodyLyrics, Deezer DMDD, NRC-VAD lexicon
+- Genius API (lyrics fetched locally, never redistributed)
+- Streamlit (dashboard and hand-annotation tool)
+- matplotlib
+- uv, ruff, mypy, pytest, GitHub Actions
+
+## Skills 🧠
+
+- Fine-tuning transformers: multi-label classification and multi-output regression
+- Domain adaptation with weak labels
+- Evaluation against public baselines, with honest reporting when the baseline wins
+- Annotation design: guidelines and validation protocol fixed before rating
+- Statistical inference on clustered data (album-level permutation and resampling, FDR correction)
+- Packaging an ML project as an installable package with CLI, tests, and CI
+- Communicating results with an interactive dashboard
 
 ## Quick start 🚀
 
@@ -181,6 +157,30 @@ uv run lyric-emotion evaluate-gold                            # human check -> d
 uv run lyric-emotion export-app                               # Phase 6 bundle
 uv run streamlit run app/streamlit_app.py                     # dashboard
 ```
+
+## Limitations ⚠️
+
+- **Gold-set annotation is still pending** — every comparison above is
+  either against a public baseline or against the model's own weak
+  training labels, not against hand-verified ground truth. Treat all
+  numbers as provisional.
+- Weak domain labels (MoodyLyrics/DMDD) are derived from Last.fm tags, not
+  direct annotation — they cap what stage 2 can prove.
+- Lyrics-only signal: valence and mood conveyed by melody, tempo, and
+  instrumentation are not modeled.
+- English only; metaphor, irony, and fictional narrators are not
+  specifically handled — a literal reading of dark lyrics may overstate
+  negative affect.
+- Studio-only dedup can't fully resolve every live/reissue edge case; see
+  `docs/dedup_report.md`.
+- No causal claims anywhere: temporal and cross-artist differences are
+  reported as associations with confidence intervals and sample sizes, not
+  as causes.
+
+What's not published here: full lyrics text, API tokens, and raw API
+responses are never committed — see `.gitignore` and `THIRD_PARTY_NOTICES.md`.
+Only code, configs, IDs, aggregated scores, figures, and the annotation
+guidelines are public.
 
 ## License
 
