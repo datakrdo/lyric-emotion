@@ -36,7 +36,7 @@ usan un clasificador de tweets de 3 clases ya entrenado. Este, en cambio:
 - matplotlib
 - uv, ruff, mypy, pytest, GitHub Actions
 
-## Skills 🧠
+## Habilidades 🧠
 
 - Fine-tuning de transformers: clasificación multietiqueta y regresión multisalida
 - Adaptación de dominio con etiquetas débiles
@@ -45,18 +45,6 @@ usan un clasificador de tweets de 3 clases ya entrenado. Este, en cambio:
 - Inferencia estadística sobre datos agrupados (permutación y remuestreo por álbum, corrección FDR)
 - Empaquetar un proyecto de ML como paquete instalable con CLI, tests y CI
 - Comunicar resultados con un dashboard interactivo
-
-## Datos 📎
-
-| etapa | fuente | tamaño | ¿redistribuible? |
-|---|---|---|---|
-| Cabeza de emociones (etapa 1) | GoEmotions | 43.410 train / 5.426 val | sí (Apache-2.0) |
-| Cabeza VAD (etapa 1) | EmoBank | 8.062 train / 999 dev | sí (CC BY-SA 4.0) |
-| Adaptación de dominio (etapa 2) | MoodyLyrics + muestra de DMDD, letras vía Genius | 4.913 canciones con etiquetado débil | no — solo IDs/etiquetas, las letras se descargan por separado |
-| Corpus del caso de estudio | Genius, deduplicado a tomas de estudio | The Cure 256 canciones / The Smiths 75 canciones | no — los términos de Genius no permiten redistribuir |
-| Gold set | anotado a mano por mí | 80 canciones muestreadas, anotación pendiente | n/a |
-
-Términos de licencia completos y uso de cada fuente: `THIRD_PARTY_NOTICES.md`.
 
 ## Decisiones de diseño 🧭
 
@@ -83,6 +71,18 @@ multitarea — más simple de depurar; multitarea queda como ablación opcional:
   suenan parecido, así que las diferencias se testean permutando/remuestreando
   álbumes enteros y la separabilidad se valida cruzadamente sobre álbumes que
   el modelo no vio.
+
+## Fuentes de datos 📎
+
+| etapa | fuente | tamaño | ¿redistribuible? |
+|---|---|---|---|
+| Cabeza de emociones (etapa 1) | GoEmotions | 43.410 train / 5.426 val | sí (Apache-2.0) |
+| Cabeza VAD (etapa 1) | EmoBank | 8.062 train / 999 dev | sí (CC BY-SA 4.0) |
+| Adaptación de dominio (etapa 2) | MoodyLyrics + muestra de DMDD, letras vía Genius | 4.913 canciones con etiquetado débil | no — solo IDs/etiquetas, las letras se descargan por separado |
+| Corpus del caso de estudio | Genius, deduplicado a tomas de estudio | The Cure 256 canciones / The Smiths 75 canciones | no — los términos de Genius no permiten redistribuir |
+| Gold set | anotado a mano por mí | 80 canciones muestreadas, anotación pendiente | n/a |
+
+Términos de licencia completos y uso de cada fuente: `THIRD_PARTY_NOTICES.md`.
 
 ## Resultados 📊
 
@@ -136,7 +136,31 @@ en un eje y "sensación general" (la mejor combinación fuera de muestra de los
 puntajes de emoción para distinguir a las bandas) en el otro. Las figuras
 estáticas están en `output/figures/`.
 
-## Quick start 🚀
+## Limitaciones ⚠️
+
+- **La anotación del gold set sigue pendiente** — toda comparación de arriba es
+  contra un baseline público o contra las propias etiquetas débiles de
+  entrenamiento del modelo, no contra verdad verificada a mano. Los números son
+  provisorios.
+- Las etiquetas débiles de dominio (MoodyLyrics/DMDD) se derivan de tags de
+  Last.fm, no de anotación directa — limitan lo que puede demostrar la etapa 2.
+- Solo señal de letra: la valencia y el ánimo que transmiten la melodía, el
+  tempo y la instrumentación no se modelan.
+- Solo inglés; metáfora, ironía y narradores ficticios no se tratan
+  específicamente — una lectura literal de letras oscuras puede sobreestimar el
+  afecto negativo.
+- La deduplicación a tomas de estudio no resuelve todos los casos borde de
+  en vivo/reediciones; ver `docs/dedup_report.md`.
+- Sin afirmaciones causales: las diferencias temporales y entre artistas se
+  reportan como asociaciones con intervalos de confianza y tamaños de muestra,
+  no como causas.
+
+Lo que no se publica acá: el texto completo de las letras, los tokens de API y
+las respuestas crudas de la API nunca se commitean — ver `.gitignore` y
+`THIRD_PARTY_NOTICES.md`. Solo son públicos el código, las configs, los IDs, los
+puntajes agregados, las figuras y las guías de anotación.
+
+## Inicio rápido 🚀
 
 ```bash
 uv sync
@@ -163,30 +187,6 @@ uv run lyric-emotion evaluate-gold                            # chequeo humano -
 uv run lyric-emotion export-app                               # Fase 6: bundle
 uv run streamlit run app/streamlit_app.py                     # dashboard
 ```
-
-## Limitaciones ⚠️
-
-- **La anotación del gold set sigue pendiente** — toda comparación de arriba es
-  contra un baseline público o contra las propias etiquetas débiles de
-  entrenamiento del modelo, no contra verdad verificada a mano. Los números son
-  provisorios.
-- Las etiquetas débiles de dominio (MoodyLyrics/DMDD) se derivan de tags de
-  Last.fm, no de anotación directa — limitan lo que puede demostrar la etapa 2.
-- Solo señal de letra: la valencia y el ánimo que transmiten la melodía, el
-  tempo y la instrumentación no se modelan.
-- Solo inglés; metáfora, ironía y narradores ficticios no se tratan
-  específicamente — una lectura literal de letras oscuras puede sobreestimar el
-  afecto negativo.
-- La deduplicación a tomas de estudio no resuelve todos los casos borde de
-  en vivo/reediciones; ver `docs/dedup_report.md`.
-- Sin afirmaciones causales: las diferencias temporales y entre artistas se
-  reportan como asociaciones con intervalos de confianza y tamaños de muestra,
-  no como causas.
-
-Lo que no se publica acá: el texto completo de las letras, los tokens de API y
-las respuestas crudas de la API nunca se commitean — ver `.gitignore` y
-`THIRD_PARTY_NOTICES.md`. Solo son públicos el código, las configs, los IDs, los
-puntajes agregados, las figuras y las guías de anotación.
 
 ## Licencia
 
