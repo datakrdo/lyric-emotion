@@ -143,7 +143,7 @@ function renderPanel() {
       <div class="big">${Math.round(typical(band, e))}<small> / 100 typical song</small></div>
       <ul class="songs">${best
         .map(
-          (s) => `<li><img src="${cover(s)}" alt="" loading="lazy" referrerpolicy="no-referrer">
+          (s) => `<li>${cover(s) ? `<img src="${cover(s)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<span class="ph" aria-hidden="true">♪</span>`}
           <div><b>${esc(s.title)}</b><span>${esc(s.album)} · ${pct(s[e] as number)}</span></div></li>`,
         )
         .join("")}</ul></div>`;
