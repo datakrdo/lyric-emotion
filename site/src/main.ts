@@ -38,8 +38,7 @@ const headline = plain ? "Annoyed. Disappointed. <em>Not sad.</em>" : f.verdict;
 const bandSongs = (band: string) => songs.filter((s) => s.artist === band);
 const typical = (band: string, emotion: string) =>
   median(bandSongs(band).map((s) => s[emotion] as number)) * 100;
-const cover = (s: Song) =>
-  albums.find((a) => a.artist === s.artist && a.album === s.album)?.cover_url ?? "";
+const cover = (s: Song) => s.cover_url;
 
 const esc = (t: string) => t.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 

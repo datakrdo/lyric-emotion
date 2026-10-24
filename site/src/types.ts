@@ -22,7 +22,7 @@ export interface Album {
 }
 export type Song = {
   artist: string; title: string; album: string; year: number;
-  valence_z: number; valence_pct: number; style: number;
+  valence_z: number; valence_pct: number; style: number; cover_url: string;
 } & Record<string, number | string>;
 export interface Bundle { findings: Findings; albums: Album[]; songs: Song[] }
 export interface Validation { status: string; summary?: string }

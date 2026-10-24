@@ -441,6 +441,10 @@ def export_app(out: str = typer.Option("site/public/data", help="Bundle director
     albums["cover_url"] = [
         covers.get((a, b), "") for a, b in zip(albums["artist"], albums["album"], strict=True)
     ]
+    # singles and B-side releases have no row in `albums`: give each song its own cover
+    songs["cover_url"] = [
+        covers.get((a, b), "") for a, b in zip(songs["artist"], songs["album"], strict=True)
+    ]
     out_dir = Path(out)
     out_dir.mkdir(parents=True, exist_ok=True)
     bundle = {
