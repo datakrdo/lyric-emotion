@@ -2,6 +2,8 @@
 
 # lyric-emotion — emotion analysis of song lyrics
 
+**▶ [Open the interactive site](https://datakrdo.github.io/lyric-emotion/)** — two spinning records, one per band; click an emotion to compare them.
+
 **Did The Cure and The Smiths actually sound as different, emotionally, as
 their reputations suggest?** Both are pillars of 1980s UK post-punk/gothic
 rock; both get flattened by casual description into "miserable." This
@@ -70,7 +72,7 @@ Pre-gold-set: every number below is provisional.
   (`docs/vad_domain_ablation.md`). Arousal and dominance did not hold up
   (arousal r = 0.135 against DMDD) and are not reported.
 
-## Dashboard 📈
+## Website 📈
 
 `site/` is a static site (Vite, TypeScript, D3) that draws a single bundle
 (`site/public/data/bundle.json`, written by `lyric-emotion export-app`; scores
@@ -81,7 +83,9 @@ album by album with covers linked from Genius (not hosted here), how sure we
 are, and how it was made. Every number and sentence comes from the pipeline;
 the page only draws them. Static figures live in `output/figures/`.
 
-![The site's hero: two spinning records, one per band](docs/img/hero.png)
+[![The site: two spinning records, one per band, and the emotion comparison panel](docs/img/hero.png)](https://datakrdo.github.io/lyric-emotion/)
+
+[![Album by album, interleaved by year, with covers](docs/img/albums.png)](https://datakrdo.github.io/lyric-emotion/)
 
 ```bash
 cd site && npm ci && npm run dev      # http://localhost:5173/lyric-emotion/

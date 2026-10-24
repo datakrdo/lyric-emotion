@@ -2,6 +2,8 @@
 
 # lyric-emotion — análisis de emociones en letras de canciones
 
+**▶ [Abrir el sitio interactivo](https://datakrdo.github.io/lyric-emotion/)** — dos vinilos girando, uno por banda; hacé clic en una emoción para compararlas.
+
 **¿The Cure y The Smiths sonaron realmente tan distintos, emocionalmente, como
 sugieren sus reputaciones?** Ambos son pilares del post-punk/rock gótico
 británico de los años 80, y ambos terminan reducidos a "deprimentes" en la
@@ -73,7 +75,7 @@ Previos al gold set: todos los números de abajo son provisorios.
   durante 1980-89 (`docs/vad_domain_ablation.md`). Activación y dominancia no
   se sostuvieron (activación r = 0,135 contra DMDD) y no se reportan.
 
-## Dashboard 📈
+## Sitio web 📈
 
 `site/` es un sitio estático (Vite, TypeScript, D3) que dibuja un único bundle
 (`site/public/data/bundle.json`, generado por `lyric-emotion export-app`; solo
@@ -85,7 +87,9 @@ enlazadas desde Genius (no alojadas acá), qué tan seguros estamos y cómo se
 hizo. Cada número y cada frase sale del pipeline; la página solo los dibuja.
 Las figuras estáticas están en `output/figures/`.
 
-![La portada del sitio: dos vinilos girando, uno por banda](docs/img/hero.png)
+[![El sitio: dos vinilos girando, uno por banda, y el panel de comparación de emociones](docs/img/hero.png)](https://datakrdo.github.io/lyric-emotion/)
+
+[![Álbum por álbum, intercalados por año, con portadas](docs/img/albums.png)](https://datakrdo.github.io/lyric-emotion/)
 
 ```bash
 cd site && npm ci && npm run dev      # http://localhost:5173/lyric-emotion/
