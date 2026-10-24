@@ -52,9 +52,7 @@ def verdict_text(compared: list[dict], band_a: str, band_b: str) -> str:
     comparison (`compared[0]` is always sadness, the question fans ask first)."""
     sad, rest = compared[0], [r for r in compared[1:] if r["significant"]]
     head = (
-        "Equally sad, in different ways"
-        if not sad["significant"]
-        else f"{sad['higher']} is sadder"
+        "Equally sad, in different ways" if not sad["significant"] else f"{sad['higher']} is sadder"
     )
     parts = []
     for band in (band_a, band_b):
@@ -193,6 +191,20 @@ def build_bundle(
     compared.sort(key=lambda r: (r["emotion"] != "sadness", r["p_album"]))
     compared = [r for i, r in enumerate(compared) if i == 0 or r["significant"]]
 
+    # --- each band's fingerprint: its typical song, "neutral" (the model's catch-all) left out ---
+    distinct = {(r["emotion"], r["higher"]) for r in compared if r["significant"]}
+    profile: dict[str, dict] = {}
+    for band, mask in ((band_a, is_a), (band_b, ~is_a)):
+        med = win.loc[mask, prob_cols].median().rename(lambda c: c.removeprefix("prob_"))
+        med = med.drop("neutral").sort_values(ascending=False)
+        profile[band] = {
+            "top": [
+                {"emotion": e, "score": float(s), "distinct": (e, band) in distinct}
+                for e, s in med.head(7).items()
+            ],
+            "sadness_rank": list(med.index).index("sadness") + 1,
+        }
+
     # --- which labels sit at each pole of the style axis (rank-based, single label) ---
     label_auc = {c.removeprefix("prob_"): roc_auc_score(is_a, win[c]) for c in prob_cols}
     ranked = sorted(label_auc, key=label_auc.__getitem__)
@@ -224,6 +236,7 @@ def build_bundle(
         },
         "verdict": verdict_text(compared, band_a, band_b),
         "emotions_compared": compared,
+        "profile": profile,
         "valence": {
             "status": darkness,
             "delta": delta,
@@ -275,6 +288,9 @@ def build_bundle(
             "stands_out": _top_k_labels(scores[prob_cols]),
         }
     )
+    # per-song score for every emotion that shows up in a band's fingerprint (no lyrics)
+    for emotion in sorted({r["emotion"] for p in profile.values() for r in p["top"]}):
+        songs[emotion] = scores[f"prob_{emotion}"].round(3)
     oof = sep["oof_score"]
     songs.loc[in_window, "style"] = (oof - oof.mean()) / oof.std()
 

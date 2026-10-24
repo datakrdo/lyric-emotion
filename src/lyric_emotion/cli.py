@@ -237,7 +237,8 @@ def evaluate_gold_cmd() -> None:
     Path("docs/gold_evaluation.md").write_text(
         "# Gold-set evaluation\n\n```json\n" + json.dumps(result, indent=2) + "\n```\n"
     )
-    out = Path("app/data/validation.json")
+    out = Path("site/public/data/validation.json")
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(result, indent=2))
     typer.echo(f"{result['summary']}\nWrote docs/gold_evaluation.md and {out}")
 
@@ -383,7 +384,7 @@ def report() -> None:
 
 
 @app.command(name="export-app")
-def export_app(out: str = typer.Option("app/data", help="Bundle directory")) -> None:
+def export_app(out: str = typer.Option("site/public/data", help="Bundle directory")) -> None:
     """Write the dashboard's data bundle (songs, albums, findings; no lyrics)."""
     import json
     import re
@@ -442,10 +443,13 @@ def export_app(out: str = typer.Option("app/data", help="Bundle directory")) -> 
     ]
     out_dir = Path(out)
     out_dir.mkdir(parents=True, exist_ok=True)
-    songs.to_parquet(out_dir / "songs.parquet", index=False)
-    albums.to_csv(out_dir / "albums.csv", index=False)
-    (out_dir / "findings.json").write_text(json.dumps(findings, indent=2, sort_keys=True))
+    bundle = {
+        "findings": findings,
+        "albums": albums.fillna("").to_dict("records"),
+        "songs": songs[songs["in_window"]].drop(columns="in_window").to_dict("records"),
+    }
+    (out_dir / "bundle.json").write_text(json.dumps(bundle, sort_keys=True))
     validation = out_dir / "validation.json"
     if not validation.exists():
         validation.write_text(json.dumps({"status": "pending"}))
-    typer.echo(f"Wrote {out_dir}/ (songs.parquet, albums.csv, findings.json, validation.json)")
+    typer.echo(f"Wrote {out_dir}/ (bundle.json, validation.json)")

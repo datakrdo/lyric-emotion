@@ -61,6 +61,10 @@ Pre-gold-set: every number below is provisional.
   Cure; delta 0.46, interval 0.25 to 0.67) qualifies. "Questioning" (higher in
   The Smiths, tracking lines that end in "?"; delta -0.35, adjusted p = 0.035)
   is suggestive: its interval, -0.57 to -0.14, just reaches the threshold.
+  Emotion by emotion (album-level permutation, FDR over all 28): sadness does
+  not differ (adjusted p = 0.62), so neither band is "sadder"; only four
+  emotions do — joy is higher in The Cure, confusion, curiosity and
+  disapproval in The Smiths (adjusted p 0.007 to 0.021).
   Valence is the mean of three `vad_domain` training seeds because a single
   seed moves the gap between -0.02 and -0.23 over 1980-89
   (`docs/vad_domain_ablation.md`). Arousal and dominance did not hold up
@@ -68,11 +72,20 @@ Pre-gold-set: every number below is provisional.
 
 ## Dashboard 📈
 
-`app/` is a self-contained Streamlit app that renders a small bundle
-(`app/data/`, written by `lyric-emotion export-app`; scores only, no lyrics).
-Its centerpiece is a two-axis map: one dot per song, brightness on one axis and
-"overall feel" (the best out-of-sample combination of emotion scores for telling
-the bands apart) on the other. Static figures live in `output/figures/`.
+`site/` is a static site (Vite, TypeScript, D3) that draws a single bundle
+(`site/public/data/bundle.json`, written by `lyric-emotion export-app`; scores
+only, no lyrics). Its hero is two spinning records, one per band, one slice per
+emotion; click a slice to compare both bands and see the songs that carry that
+emotion most. Below: why neither band is "the sad one", every song on a map,
+album by album with covers linked from Genius (not hosted here), how sure we
+are, and how it was made. Every number and sentence comes from the pipeline;
+the page only draws them. Static figures live in `output/figures/`.
+
+![The site's hero: two spinning records, one per band](docs/img/hero.png)
+
+```bash
+cd site && npm ci && npm run dev      # http://localhost:5173/lyric-emotion/
+```
 
 ## Data sources 📎
 
@@ -116,7 +129,7 @@ model — simpler to debug, and multi-task is left as an optional ablation:
 - PyTorch, Hugging Face Transformers (ModernBERT-base fine-tuning)
 - GoEmotions, EmoBank, MoodyLyrics, Deezer DMDD, NRC-VAD lexicon
 - Genius API (lyrics fetched locally, never redistributed)
-- Streamlit (dashboard and hand-annotation tool)
+- TypeScript, Vite, D3 (public site); Streamlit (local hand-annotation tool)
 - matplotlib
 - uv, ruff, mypy, pytest, GitHub Actions
 
@@ -128,7 +141,7 @@ model — simpler to debug, and multi-task is left as an optional ablation:
 - Annotation design: guidelines and validation protocol fixed before rating
 - Statistical inference on clustered data (album-level permutation and resampling, FDR correction)
 - Packaging an ML project as an installable package with CLI, tests, and CI
-- Communicating results with an interactive dashboard
+- Communicating results with an interactive public site
 
 ## Quick start 🚀
 
@@ -153,9 +166,9 @@ uv run lyric-emotion train --head vad-domain     # Phase 4 stage 2
 uv run lyric-emotion analyze && uv run lyric-emotion report   # Phase 5
 uv run lyric-emotion gold-sample                              # Phase 4: draw the 80 songs
 uv run streamlit run annotation/annotate.py                   # rate them (local only)
-uv run lyric-emotion evaluate-gold                            # human check -> dashboard
+uv run lyric-emotion evaluate-gold                            # human check -> site
 uv run lyric-emotion export-app                               # Phase 6 bundle
-uv run streamlit run app/streamlit_app.py                     # dashboard
+(cd site && npm ci && npm run dev)                            # the site
 ```
 
 ## Limitations ⚠️

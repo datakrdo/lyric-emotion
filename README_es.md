@@ -64,19 +64,32 @@ Previos al gold set: todos los números de abajo son provisorios.
   0,46, intervalo 0,25 a 0,67) lo cumple. "Cuestionamiento" (mayor en The
   Smiths, sigue a las líneas que terminan en "?"; delta -0,35, p ajustado =
   0,035) es sugestivo: su intervalo, de -0,57 a -0,14, apenas alcanza el
-  umbral. La valencia es el promedio de tres semillas de entrenamiento de
+  umbral. Emoción por emoción (permutación a nivel álbum, FDR sobre las 28):
+  la tristeza no difiere (p ajustado = 0,62), así que ninguna banda es "más
+  triste"; solo cuatro emociones difieren — la alegría es mayor en The Cure,
+  la confusión, la curiosidad y la desaprobación en The Smiths (p ajustado
+  0,007 a 0,021). La valencia es el promedio de tres semillas de entrenamiento de
   `vad_domain`, porque una sola semilla mueve la brecha entre -0,02 y -0,23
   durante 1980-89 (`docs/vad_domain_ablation.md`). Activación y dominancia no
   se sostuvieron (activación r = 0,135 contra DMDD) y no se reportan.
 
 ## Dashboard 📈
 
-`app/` es una app Streamlit autocontenida que renderiza un bundle chico
-(`app/data/`, generado por `lyric-emotion export-app`; solo puntajes, sin
-letras). Su pieza central es un mapa de dos ejes: un punto por canción, brillo
-en un eje y "sensación general" (la mejor combinación fuera de muestra de los
-puntajes de emoción para distinguir a las bandas) en el otro. Las figuras
-estáticas están en `output/figures/`.
+`site/` es un sitio estático (Vite, TypeScript, D3) que dibuja un único bundle
+(`site/public/data/bundle.json`, generado por `lyric-emotion export-app`; solo
+puntajes, sin letras). Su portada son dos vinilos girando, uno por banda y un
+gajo por emoción; al hacer clic en un gajo se comparan las dos bandas y se ven
+las canciones que más transmiten esa emoción. Más abajo: por qué ninguna banda
+es "la triste", todas las canciones en un mapa, álbum por álbum con portadas
+enlazadas desde Genius (no alojadas acá), qué tan seguros estamos y cómo se
+hizo. Cada número y cada frase sale del pipeline; la página solo los dibuja.
+Las figuras estáticas están en `output/figures/`.
+
+![La portada del sitio: dos vinilos girando, uno por banda](docs/img/hero.png)
+
+```bash
+cd site && npm ci && npm run dev      # http://localhost:5173/lyric-emotion/
+```
 
 ## Fuentes de datos 📎
 
@@ -122,7 +135,7 @@ multitarea — más simple de depurar; multitarea queda como ablación opcional:
 - PyTorch, Hugging Face Transformers (fine-tuning de ModernBERT-base)
 - GoEmotions, EmoBank, MoodyLyrics, Deezer DMDD, léxico NRC-VAD
 - API de Genius (letras descargadas en local, nunca redistribuidas)
-- Streamlit (dashboard y herramienta de anotación manual)
+- TypeScript, Vite, D3 (sitio público); Streamlit (herramienta local de anotación manual)
 - matplotlib
 - uv, ruff, mypy, pytest, GitHub Actions
 
@@ -134,7 +147,7 @@ multitarea — más simple de depurar; multitarea queda como ablación opcional:
 - Diseño de anotación: guías y protocolo de validación fijados antes de anotar
 - Inferencia estadística sobre datos agrupados (permutación y remuestreo por álbum, corrección FDR)
 - Empaquetar un proyecto de ML como paquete instalable con CLI, tests y CI
-- Comunicar resultados con un dashboard interactivo
+- Comunicar resultados con un sitio público interactivo
 
 ## Inicio rápido 🚀
 
@@ -159,9 +172,9 @@ uv run lyric-emotion train --head vad-domain     # Fase 4 etapa 2
 uv run lyric-emotion analyze && uv run lyric-emotion report   # Fase 5
 uv run lyric-emotion gold-sample                              # Fase 4: sortea las 80 canciones
 uv run streamlit run annotation/annotate.py                   # anotarlas (solo local)
-uv run lyric-emotion evaluate-gold                            # chequeo humano -> dashboard
+uv run lyric-emotion evaluate-gold                            # chequeo humano -> sitio
 uv run lyric-emotion export-app                               # Fase 6: bundle
-uv run streamlit run app/streamlit_app.py                     # dashboard
+(cd site && npm ci && npm run dev)                            # el sitio
 ```
 
 ## Limitaciones ⚠️

@@ -24,6 +24,21 @@ jobs:
       - name: Type check
         run: uv run mypy src
 
-      # Offline tests only; the dashboard smoke test runs against the committed bundle.
+      # Offline tests only.
       - name: Tests
         run: uv run pytest -m "not network"
+
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Build site (type check included)
+        working-directory: site
+        run: |
+          npm ci
+          npm run build

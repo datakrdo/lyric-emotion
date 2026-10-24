@@ -59,4 +59,4 @@ Created by `lyric-emotion gold-sample`; contains no lyrics and no model scores.
 | `is_reannotation` | 1 for the re-rated rows |
 
 When done: `uv run lyric-emotion evaluate-gold` writes `docs/gold_evaluation.md` and
-`app/data/validation.json`, which the dashboard's "Human check" row reads.
+`site/public/data/validation.json`, which the site's "Human check" row reads.

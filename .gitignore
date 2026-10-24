@@ -19,3 +19,11 @@ models/
 *.safetensors
 .DS_Store
 .claude/
+.serena/
+.agents/
+graphify-out/
+scratch*
+*.log
+.superpowers/
+site/node_modules/
+site/dist/

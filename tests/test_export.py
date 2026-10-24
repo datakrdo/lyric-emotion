@@ -71,12 +71,16 @@ def test_build_bundle_reports_equal_darkness_but_clear_style_and_leaks_no_lyrics
     compared = findings["emotions_compared"]
     assert compared[0]["emotion"] == "sadness" and not compared[0]["significant"]
     assert any(r["emotion"] == "joy" and r["higher"] == "The Cure" for r in compared)
+    cure = findings["profile"]["The Cure"]
+    assert "neutral" not in {r["emotion"] for r in cure["top"]} and len(cure["top"]) == 7
+    assert any(r["emotion"] == "joy" and r["distinct"] for r in cure["top"])
     assert "{" not in findings["verdict"]
     assert findings["valence"]["status"] == "none_detected"
     assert findings["style"]["auc"] > 0.7
     assert findings["families"][0]["family"] == "Joy & fun"
     assert findings["families"][0]["p_cure_higher"] > 0.8
     assert songs["stands_out"].str.count(",").eq(2).all()
+    assert "joy" in songs.columns  # per-song score of the fingerprint emotions
     assert "lyrics" not in songs.columns and "text" not in songs.columns
     assert songs["style"].notna().all() and len(songs) == len(scores)
     assert {"valence_z_mean", "valence_z_ci_low"} <= set(albums.columns)
