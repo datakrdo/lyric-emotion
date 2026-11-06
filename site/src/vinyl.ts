@@ -58,7 +58,7 @@ export function mountDisc(
     spin.append("circle").attr("r", r).attr("fill", "none").attr("stroke", "#0d0d12")
       .attr("opacity", 0.3).style("pointer-events", "none");
   }
-  spin.append("circle").attr("r", 12).attr("fill", accent).style("pointer-events", "none");
+  spin.append("circle").attr("r", 12).style("fill", accent).style("pointer-events", "none");
   spin.append("circle").attr("r", 2.2).attr("fill", "#0d0d12").style("pointer-events", "none");
 
   // Glint that stays still while the record turns: sells the vinyl.

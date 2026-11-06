@@ -17,7 +17,7 @@ const [bundle, validation]: [Bundle, Validation] = await Promise.all([
 ]);
 const { findings: f, albums, songs } = bundle;
 const [A, B] = f.bands;
-const COLOR: Record<string, string> = { [A]: "#b583ff", [B]: "#ffb454" };
+const COLOR: Record<string, string> = { [A]: "var(--cure)", [B]: "var(--smiths)" };
 const win = f.window;
 const span = `${win.start_year}–${win.end_year}`;
 
@@ -44,12 +44,16 @@ const esc = (t: string) => t.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
 // ---------- page skeleton ----------
 document.querySelector<HTMLElement>("#app")!.innerHTML = `
+<button class="theme-toggle" id="theme" type="button" aria-label="Switch between light and dark mode">
+  <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+</button>
 <section class="hero" id="top">
-  <div class="kick">${span} · ${win.n_songs} songs · two bands</div>
   <h1>${headline}</h1>
   <p class="lede">What a language model hears in the lyrics of the two “saddest” bands of the 80s.
   Each record is a band’s typical song: the wider the slice, the stronger the emotion.
   Touch a slice.</p>
+  <div class="kick">${span} · ${win.n_songs} songs · two bands</div>
   <div class="discs">${f.bands.map(deck).join("")}</div>
   <p class="hint">Hover a slice to stop the record · click it to compare · ★ marks what is the band’s own</p>
   <div class="panel" id="panel" aria-live="polite"></div>
@@ -67,8 +71,17 @@ linked from Genius, not hosted. Data: GoEmotions (Apache-2.0), EmoBank (CC BY-SA
 MoodyLyrics, Deezer DMDD. <a href="${REPO}">Source</a></footer>
 <div class="tip" id="tip"></div>`;
 
+document.querySelector<HTMLButtonElement>("#theme")!.addEventListener("click", () => {
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const cur = document.documentElement.dataset.theme ?? (dark ? "dark" : "light");
+  const next = cur === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next === "dark" ? "#0d0d12" : "#f6f5f1");
+  try { localStorage.setItem("theme", next); } catch { /* private mode: not persisted */ }
+});
+
 function deck(band: string): string {
-  const arm = `<svg class="arm" viewBox="0 0 100 100" aria-hidden="true"><path d="M92 8 L40 60" stroke="#c9c9d6" stroke-width="3.5" stroke-linecap="round"/><circle cx="92" cy="8" r="6" fill="#2a2a36" stroke="#c9c9d6"/><rect x="30" y="56" width="16" height="9" rx="2" transform="rotate(45 38 60)" fill="#c9c9d6"/></svg>`;
+  const arm = `<svg class="arm" viewBox="0 0 100 100" aria-hidden="true"><path d="M92 8 L40 60" style="stroke:var(--arm)" stroke-width="3.5" stroke-linecap="round"/><circle cx="92" cy="8" r="6" style="fill:var(--line);stroke:var(--arm)"/><rect x="30" y="56" width="16" height="9" rx="2" transform="rotate(45 38 60)" style="fill:var(--arm)"/></svg>`;
   const items = f.profile[band].top
     .map(
       (r) => `<li><button data-e="${r.emotion}" aria-pressed="false" class="${r.distinct ? "own" : ""}">
@@ -185,14 +198,14 @@ function scatter() {
   svg.append("g").attr("class", "axis").attr("transform", `translate(${x(0)},0)`).call(d3.axisLeft(y).ticks(0));
   const poles = f.poles;
   svg.append("text").attr("class", "axis").attr("x", W / 2).attr("y", H - 14).attr("text-anchor", "middle")
-    .attr("fill", "#a2a2b2").attr("font-size", 13).text("← darker                    brighter →");
-  svg.append("text").attr("x", m.l + 8).attr("y", m.t + 14).attr("fill", COLOR[A]).attr("font-size", 13)
+    .style("fill", "var(--mute)").attr("font-size", 13).text("← darker                    brighter →");
+  svg.append("text").attr("x", m.l + 8).attr("y", m.t + 14).style("fill", COLOR[A]).attr("font-size", 13)
     .text(`▲ more ${poles[A].slice(0, 3).join(", ")}`);
-  svg.append("text").attr("x", m.l + 8).attr("y", H - m.b - 8).attr("fill", COLOR[B]).attr("font-size", 13)
+  svg.append("text").attr("x", m.l + 8).attr("y", H - m.b - 8).style("fill", COLOR[B]).attr("font-size", 13)
     .text(`▼ more ${poles[B].slice(0, 3).join(", ")}`);
   svg.append("g").selectAll("circle").data(songs).join("circle")
     .attr("cx", (s) => x(s.valence_z)).attr("cy", (s) => y(s.style)).attr("r", 0)
-    .attr("fill", (s) => COLOR[s.artist]).attr("fill-opacity", 0.8).attr("stroke", "#0d0d12")
+    .style("fill", (s) => COLOR[s.artist]).attr("fill-opacity", 0.8).style("stroke", "var(--bg)")
     .on("pointermove", (e: PointerEvent, s) => {
       tip.textContent = `${s.title} · ${s.album} (${s.year})`;
       tip.style.opacity = "1";
