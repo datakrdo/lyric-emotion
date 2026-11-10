@@ -110,7 +110,7 @@ def va_trajectory_figure(album_scores: pd.DataFrame, viz: Visualization, path: P
     ax.set_ylabel("arousal")
     ax.set_title("Album trajectories in the valence-arousal plane")
     ax.legend(frameon=False)
-    _style_axes(ax)
+    _style_axes(ax, THEMES["light"])
     fig.tight_layout()
     fig.savefig(path, dpi=viz.dpi, facecolor=_SURFACE)
     plt.close(fig)
